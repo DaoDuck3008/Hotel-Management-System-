@@ -1,10 +1,8 @@
 "use strict";
 
-require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const Sequelize = require("sequelize");
-const process = require("process");
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || "development";
 const config = require(__dirname + "/../config/config.json")[env];
@@ -22,28 +20,35 @@ if (config.use_env_variable) {
   );
 }
 
-fs.readdirSync(__dirname)
-  .filter((file) => {
-    return (
-      file.indexOf(".") !== 0 &&
-      file !== basename &&
-      file.slice(-3) === ".js" &&
-      file.indexOf(".test.js") === -1
-    );
-  })
-  .forEach((file) => {
-    const model = require(path.join(__dirname, file))(
-      sequelize,
-      Sequelize.DataTypes
-    );
-    db[model.name] = model;
-  });
+// load model class files
+const modelFiles = fs
+  .readdirSync(__dirname)
+  .filter(
+    (file) =>
+      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js"
+  );
 
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
+const modelClasses = {};
+for (const file of modelFiles) {
+  const modelClass = require(path.join(__dirname, file));
+  // skip index.js itself
+  modelClasses[file.replace(".js", "")] = modelClass;
+}
+
+// init all models
+for (const key of Object.keys(modelClasses)) {
+  const modelClass = modelClasses[key];
+  // call static init to register model
+  const modelInstance = modelClass.init(sequelize, Sequelize.DataTypes);
+  db[modelInstance.name] = modelInstance;
+}
+
+// call associate on each model if exists
+for (const modelName of Object.keys(db)) {
+  if (typeof db[modelName].associate === "function") {
     db[modelName].associate(db);
   }
-});
+}
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
