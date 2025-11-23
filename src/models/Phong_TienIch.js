@@ -1,17 +1,28 @@
-module.exports = (sequelize, DataTypes) => {
-  const Phong_TienIch = sequelize.define(
-    "Phong_TienIch",
-    {
-      MaPhong: { type: DataTypes.STRING(4), primaryKey: true },
-      TenTienIch: { type: DataTypes.STRING(50), primaryKey: true },
-    },
-    { tableName: "Phong_TienIch", timestamps: false }
-  );
+const { Model } = require("sequelize");
 
-  Phong_TienIch.associate = (models) => {
-    Phong_TienIch.belongsTo(models.Phong, { foreignKey: "MaPhong" });
-    Phong_TienIch.belongsTo(models.TienIch, { foreignKey: "TenTienIch" });
-  };
+class Phong_TienIch extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        MaPhong: {
+          type: DataTypes.STRING(4),
+          allowNull: false,
+          primaryKey: true,
+        },
+        TenTienIch: {
+          type: DataTypes.STRING(50),
+          allowNull: false,
+          primaryKey: true,
+        },
+      },
+      { sequelize, tableName: "Phong_TienIch", timestamps: false }
+    );
+  }
 
-  return Phong_TienIch;
-};
+  static associate(models) {
+    this.belongsTo(models.Phong, { foreignKey: "MaPhong" });
+    this.belongsTo(models.TienIch, { foreignKey: "TenTienIch" });
+  }
+}
+
+module.exports = Phong_TienIch;

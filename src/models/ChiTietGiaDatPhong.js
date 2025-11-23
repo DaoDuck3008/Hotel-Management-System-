@@ -1,26 +1,28 @@
-module.exports = (sequelize, DataTypes) => {
-  const ChiTietGiaDatPhong = sequelize.define(
-    "ChiTietGiaDatPhong",
-    {
-      MaCTGiaDatPhong: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+const { Model } = require("sequelize");
+
+class ChiTietGiaDatPhong extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        MaCTGiaDatPhong: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
+        },
+        MaCTDatPhong: { type: DataTypes.INTEGER, allowNull: false },
+        Ngay: { type: DataTypes.DATEONLY, allowNull: false },
+        GiaNgay: { type: DataTypes.INTEGER, allowNull: false },
+        GiaGio: { type: DataTypes.INTEGER, allowNull: true },
+        LoaiGia: { type: DataTypes.STRING(20), allowNull: false },
       },
-      MaCTDatPhong: DataTypes.INTEGER,
-      Ngay: DataTypes.DATEONLY,
-      GiaNgay: DataTypes.INTEGER,
-      GiaGio: DataTypes.INTEGER,
-      LoaiGia: DataTypes.STRING(20),
-    },
-    { tableName: "ChiTietGiaDatPhong", timestamps: false }
-  );
+      { sequelize, tableName: "ChiTietGiaDatPhong", timestamps: false }
+    );
+  }
 
-  ChiTietGiaDatPhong.associate = (models) => {
-    ChiTietGiaDatPhong.belongsTo(models.ChiTietDatPhong, {
-      foreignKey: "MaCTDatPhong",
-    });
-  };
+  static associate(models) {
+    this.belongsTo(models.ChiTietDatPhong, { foreignKey: "MaCTDatPhong" });
+  }
+}
 
-  return ChiTietGiaDatPhong;
-};
+module.exports = ChiTietGiaDatPhong;

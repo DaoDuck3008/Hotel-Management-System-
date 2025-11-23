@@ -1,24 +1,28 @@
-module.exports = (sequelize, DataTypes) => {
-  const DatPhong = sequelize.define(
-    "DatPhong",
-    {
-      MaDatPhong: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+const { Model } = require("sequelize");
+
+class DatPhong extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        MaDatPhong: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
+        },
+        MaKhachHang: { type: DataTypes.STRING(10), allowNull: false },
+        NgayDat: { type: DataTypes.DATE, allowNull: false },
+        NgayNhanPhong: { type: DataTypes.DATE, allowNull: false },
+        NgayTraPhong: { type: DataTypes.DATE, allowNull: false },
       },
-      MaKhachHang: DataTypes.STRING(10),
-      NgayDat: DataTypes.DATE,
-      NgayNhanPhong: DataTypes.DATE,
-      NgayTraPhong: DataTypes.DATE,
-    },
-    { tableName: "DatPhong", timestamps: false }
-  );
+      { sequelize, tableName: "DatPhong", timestamps: false }
+    );
+  }
 
-  DatPhong.associate = (models) => {
-    DatPhong.belongsTo(models.KhachHang, { foreignKey: "MaKhachHang" });
-    DatPhong.hasMany(models.ChiTietDatPhong, { foreignKey: "MaDatPhong" });
-  };
+  static associate(models) {
+    this.belongsTo(models.KhachHang, { foreignKey: "MaKhachHang" });
+    this.hasMany(models.ChiTietDatPhong, { foreignKey: "MaDatPhong" });
+  }
+}
 
-  return DatPhong;
-};
+module.exports = DatPhong;

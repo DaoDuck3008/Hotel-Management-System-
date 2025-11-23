@@ -1,18 +1,29 @@
-module.exports = (sequelize, DataTypes) => {
-  const GiaPhongTuan = sequelize.define(
-    "GiaPhongTuan",
-    {
-      MaPhong: { type: DataTypes.STRING(4), primaryKey: true },
-      ThuApDung: { type: DataTypes.INTEGER, primaryKey: true },
-      GiaNgay: DataTypes.INTEGER,
-      GiaGio: DataTypes.INTEGER,
-    },
-    { tableName: "GiaPhongTuan", timestamps: false }
-  );
+const { Model } = require("sequelize");
 
-  GiaPhongTuan.associate = (models) => {
-    GiaPhongTuan.belongsTo(models.Phong, { foreignKey: "MaPhong" });
-  };
+class GiaPhongTuan extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        MaPhong: {
+          type: DataTypes.STRING(4),
+          allowNull: false,
+          primaryKey: true,
+        },
+        ThuApDung: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          primaryKey: true,
+        },
+        GiaNgay: { type: DataTypes.INTEGER, allowNull: true },
+        GiaGio: { type: DataTypes.INTEGER, allowNull: true },
+      },
+      { sequelize, tableName: "GiaPhongTuan", timestamps: false }
+    );
+  }
 
-  return GiaPhongTuan;
-};
+  static associate(models) {
+    this.belongsTo(models.Phong, { foreignKey: "MaPhong" });
+  }
+}
+
+module.exports = GiaPhongTuan;

@@ -1,21 +1,25 @@
-module.exports = (sequelize, DataTypes) => {
-  const HinhAnh = sequelize.define(
-    "HinhAnh",
-    {
-      MaHinhAnh: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+const { Model } = require("sequelize");
+
+class HinhAnh extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        MaHinhAnh: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
+        },
+        MaPhong: { type: DataTypes.STRING(4), allowNull: false },
+        ImgURL: { type: DataTypes.STRING(255), allowNull: false },
       },
-      MaPhong: DataTypes.STRING(4),
-      ImgURL: DataTypes.STRING(255),
-    },
-    { tableName: "HinhAnh", timestamps: false }
-  );
+      { sequelize, tableName: "HinhAnh", timestamps: false }
+    );
+  }
 
-  HinhAnh.associate = (models) => {
-    HinhAnh.belongsTo(models.Phong, { foreignKey: "MaPhong" });
-  };
+  static associate(models) {
+    this.belongsTo(models.Phong, { foreignKey: "MaPhong" });
+  }
+}
 
-  return HinhAnh;
-};
+module.exports = HinhAnh;

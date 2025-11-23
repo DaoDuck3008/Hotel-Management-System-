@@ -1,21 +1,28 @@
-module.exports = (sequelize, DataTypes) => {
-  const TienIch = sequelize.define(
-    "TienIch",
-    {
-      TenTienIch: { type: DataTypes.STRING(50), primaryKey: true },
-      IconURL: DataTypes.STRING(255),
-      MoTa: DataTypes.STRING(255),
-    },
-    { tableName: "TienIch", timestamps: false }
-  );
+const { Model } = require("sequelize");
 
-  TienIch.associate = (models) => {
-    TienIch.belongsToMany(models.Phong, {
+class TienIch extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        TenTienIch: {
+          type: DataTypes.STRING(50),
+          primaryKey: true,
+          allowNull: false,
+        },
+        IconURL: { type: DataTypes.STRING(255), allowNull: false },
+        MoTa: { type: DataTypes.STRING(255), allowNull: true },
+      },
+      { sequelize, tableName: "TienIch", timestamps: false }
+    );
+  }
+
+  static associate(models) {
+    this.belongsToMany(models.Phong, {
       through: models.Phong_TienIch,
       foreignKey: "TenTienIch",
       otherKey: "MaPhong",
     });
-  };
+  }
+}
 
-  return TienIch;
-};
+module.exports = TienIch;

@@ -1,20 +1,28 @@
-module.exports = (sequelize, DataTypes) => {
-  const KhachHang = sequelize.define(
-    "KhachHang",
-    {
-      MaKhachHang: { type: DataTypes.STRING(10), primaryKey: true },
-      HoVaTen: DataTypes.STRING(100),
-      GioiTinh: DataTypes.STRING(10),
-      NgaySinh: DataTypes.DATEONLY,
-      SDT: DataTypes.STRING(10),
-      Email: DataTypes.STRING(100),
-    },
-    { tableName: "KhachHang", timestamps: false }
-  );
+const { Model } = require("sequelize");
 
-  KhachHang.associate = (models) => {
-    KhachHang.hasMany(models.DatPhong, { foreignKey: "MaKhachHang" });
-  };
+class KhachHang extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        MaKhachHang: {
+          type: DataTypes.STRING(10),
+          primaryKey: true,
+          allowNull: false,
+        },
+        HoVaTen: { type: DataTypes.STRING(100), allowNull: false },
+        GioiTinh: { type: DataTypes.STRING(10), allowNull: false },
+        NgaySinh: { type: DataTypes.DATEONLY, allowNull: true },
+        SDT: { type: DataTypes.STRING(15), allowNull: true },
+        Email: { type: DataTypes.STRING(100), allowNull: false },
+        Passsword: { type: DataTypes.STRING(255), allowNull: false },
+      },
+      { sequelize, tableName: "KhachHang", timestamps: false }
+    );
+  }
 
-  return KhachHang;
-};
+  static associate(models) {
+    this.hasMany(models.DatPhong, { foreignKey: "MaKhachHang" });
+  }
+}
+
+module.exports = KhachHang;

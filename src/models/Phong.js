@@ -1,33 +1,44 @@
-module.exports = (sequelize, DataTypes) => {
-  const Phong = sequelize.define(
-    "Phong",
-    {
-      MaPhong: { type: DataTypes.STRING(4), primaryKey: true },
-      TenLoaiPhong: DataTypes.STRING(50),
-      TenPhong: DataTypes.STRING(255),
-      SucChua: DataTypes.TINYINT,
-      SoGiuong: DataTypes.TINYINT,
-      GiaNgayCB: DataTypes.INTEGER,
-      GiaGioCB: DataTypes.INTEGER,
-    },
-    { tableName: "Phong", timestamps: false }
-  );
+const { Model } = require("sequelize");
 
-  Phong.associate = (models) => {
-    Phong.belongsTo(models.LoaiPhong, { foreignKey: "TenLoaiPhong" });
+class Phong extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        MaPhong: {
+          type: DataTypes.STRING(4),
+          primaryKey: true,
+          allowNull: false,
+        },
+        TenLoaiPhong: { type: DataTypes.STRING(50), allowNull: false },
+        TenPhong: { type: DataTypes.STRING(255), allowNull: false },
+        SucChua: { type: DataTypes.TINYINT, allowNull: false, defaultValue: 1 },
+        SoGiuong: {
+          type: DataTypes.TINYINT,
+          allowNull: false,
+          defaultValue: 1,
+        },
+        GiaNgayCB: { type: DataTypes.INTEGER, allowNull: false },
+        GiaGioCB: { type: DataTypes.INTEGER, allowNull: false },
+      },
+      { sequelize, tableName: "Phong", timestamps: false }
+    );
+  }
 
-    Phong.hasMany(models.HinhAnh, { foreignKey: "MaPhong" });
-    Phong.hasMany(models.TrangThaiPhong, { foreignKey: "MaPhong" });
-    Phong.hasMany(models.GiaPhongTuan, { foreignKey: "MaPhong" });
-    Phong.hasMany(models.GiaPhongNgayLe, { foreignKey: "MaPhong" });
-    Phong.hasMany(models.ChiTietDatPhong, { foreignKey: "MaPhong" });
+  static associate(models) {
+    this.belongsTo(models.LoaiPhong, { foreignKey: "TenLoaiPhong" });
 
-    Phong.belongsToMany(models.TienIch, {
+    this.hasMany(models.HinhAnh, { foreignKey: "MaPhong" });
+    this.hasMany(models.TrangThaiPhong, { foreignKey: "MaPhong" });
+    this.hasMany(models.GiaPhongTuan, { foreignKey: "MaPhong" });
+    this.hasMany(models.GiaPhongNgayLe, { foreignKey: "MaPhong" });
+    this.hasMany(models.ChiTietDatPhong, { foreignKey: "MaPhong" });
+
+    this.belongsToMany(models.TienIch, {
       through: models.Phong_TienIch,
       foreignKey: "MaPhong",
       otherKey: "TenTienIch",
     });
-  };
+  }
+}
 
-  return Phong;
-};
+module.exports = Phong;

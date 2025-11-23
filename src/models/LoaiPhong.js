@@ -1,16 +1,23 @@
-module.exports = (sequelize, DataTypes) => {
-  const LoaiPhong = sequelize.define(
-    "LoaiPhong",
-    {
-      TenLoaiPhong: { type: DataTypes.STRING(50), primaryKey: true },
-      MoTa: DataTypes.STRING(500),
-    },
-    { tableName: "LoaiPhong", timestamps: false }
-  );
+const { Model } = require("sequelize");
 
-  LoaiPhong.associate = (models) => {
-    LoaiPhong.hasMany(models.Phong, { foreignKey: "TenLoaiPhong" });
-  };
+class LoaiPhong extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        TenLoaiPhong: {
+          type: DataTypes.STRING(50),
+          primaryKey: true,
+          allowNull: false,
+        },
+        MoTa: { type: DataTypes.STRING(500), allowNull: true },
+      },
+      { sequelize, tableName: "LoaiPhong", timestamps: false }
+    );
+  }
 
-  return LoaiPhong;
-};
+  static associate(models) {
+    this.hasMany(models.Phong, { foreignKey: "TenLoaiPhong" });
+  }
+}
+
+module.exports = LoaiPhong;
