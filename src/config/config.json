@@ -7,8 +7,7 @@
     "dialect": "mysql",
     "define": {
       "freezeTableName": true
-    },
-    "timestapms": false
+    }
   },
   "test": {
     "username": "root",

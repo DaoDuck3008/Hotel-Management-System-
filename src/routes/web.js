@@ -1,4 +1,5 @@
 import express from "express";
+import PhongController from "../controllers/PhongController.js";
 const router = express.Router();
 
 /**
@@ -8,8 +9,10 @@ const router = express.Router();
 
 const initWebRoutes = (app) => {
   router.get("/", (req, res) => {
-    return res.send("Hello mother fucker!");
+    return res.send("Hello World!");
   });
+
+  router;
 
   return app.use("/", router);
 };
