@@ -6,22 +6,24 @@ class Phong_TienIch extends Model {
       {
         MaPhong: {
           type: DataTypes.STRING(4),
-          allowNull: false,
           primaryKey: true,
         },
-        TenTienIch: {
-          type: DataTypes.STRING(50),
-          allowNull: false,
+        MaTienIch: {
+          type: DataTypes.INTEGER,
           primaryKey: true,
         },
       },
-      { sequelize, tableName: "Phong_TienIch", timestamps: false }
+      {
+        sequelize,
+        tableName: "Phong_TienIch",
+        timestamps: false,
+      }
     );
   }
 
   static associate(models) {
     this.belongsTo(models.Phong, { foreignKey: "MaPhong" });
-    this.belongsTo(models.TienIch, { foreignKey: "TenTienIch" });
+    this.belongsTo(models.TienIch, { foreignKey: "MaTienIch" });
   }
 }
 

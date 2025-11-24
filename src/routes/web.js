@@ -1,5 +1,7 @@
 import express from "express";
-import PhongController from "../controllers/PhongController.js";
+import PhongController from "../controller/PhongController.js";
+import upload from "../middlewares/upload.js";
+
 const router = express.Router();
 
 /**
@@ -12,7 +14,9 @@ const initWebRoutes = (app) => {
     return res.send("Hello World!");
   });
 
-  router;
+  router.get("/rooms", PhongController.index);
+  router.get("/rooms/create", PhongController.create);
+  router.post("/rooms", upload.array("images", 20), PhongController.store);
 
   return app.use("/", router);
 };
