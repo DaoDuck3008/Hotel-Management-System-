@@ -20,6 +20,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
+// Static files
+app.use(express.static("public"));
+
 // Test connection DB
 connectDB();
 

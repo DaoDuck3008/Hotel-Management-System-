@@ -43,10 +43,11 @@ module.exports = {
       },
       TenLoaiPhong: { type: DataTypes.STRING(50), allowNull: false },
       TenPhong: { type: DataTypes.STRING(255), allowNull: false },
-      SucChua: { type: DataTypes.TINYINT, allowNull: false, defaultValue: 1 },
-      SoGiuong: { type: DataTypes.TINYINT, allowNull: false, defaultValue: 1 },
+      SucChua: { type: DataTypes.TINYINT, allowNull: true, defaultValue: 1 },
+      SoGiuong: { type: DataTypes.TINYINT, allowNull: true, defaultValue: 1 },
       GiaNgayCB: { type: DataTypes.INTEGER, allowNull: false },
       GiaGioCB: { type: DataTypes.INTEGER, allowNull: false },
+      MoTa: { type: DataTypes.STRING(500), allowNull: true },
     });
 
     // ===========================
@@ -70,13 +71,25 @@ module.exports = {
     // 5. TienIch
     // ===========================
     await queryInterface.createTable("TienIch", {
+      MaTienIch: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       TenTienIch: {
         type: DataTypes.STRING(50),
-        primaryKey: true,
+        allowNull: false,
+        unique: true,
+      },
+      IconURL: {
+        type: DataTypes.STRING(255),
         allowNull: false,
       },
-      IconURL: { type: DataTypes.STRING(255), allowNull: false },
-      MoTa: { type: DataTypes.STRING(255), allowNull: true },
+      MoTa: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
     });
 
     // ===========================
@@ -86,12 +99,10 @@ module.exports = {
       MaPhong: {
         type: DataTypes.STRING(4),
         allowNull: false,
-        primaryKey: true,
       },
-      TenTienIch: {
-        type: DataTypes.STRING(50),
+      MaTienIch: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true,
       },
     });
 
