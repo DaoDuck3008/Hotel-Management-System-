@@ -36,6 +36,8 @@ const createRoomSchema = Joi.object({
     .optional(),
 
   tienIch: Joi.array().items(Joi.string().regex(/^\d+$/)).required(),
+
+  deletedImages: Joi.array().items(Joi.string().regex(/^\d+$/)).optional(),
 });
 
 module.exports = {

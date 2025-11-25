@@ -89,7 +89,6 @@ class PhongDAO {
       }
 
       // lưu giá theo ngày lễ
-      // lưu giá theo ngày lễ
       if (data.giaLe && data.giaLe.length > 0) {
         for (const item of data.giaLe) {
           if (!item || !item.ten) continue;
@@ -190,6 +189,143 @@ class PhongDAO {
       };
     } catch (error) {
       console.error("Error deleting room in PhongDAO:", error);
+      throw error;
+    }
+  }
+
+  // Cập nhật phòng
+  static async update(maPhong, data, files) {
+    const transaction = await db.sequelize.transaction();
+    try {
+      // Cập nhật thông tin phòng
+      await db.Phong.update(
+        {
+          TenPhong: data.tenPhong,
+          TenLoaiPhong: data.loaiPhong,
+          SoGiuong: data.soGiuong,
+          SucChua: data.sucChua,
+          MoTa: data.moTa,
+          GiaNgayCB: data.giaTheoNgay,
+          GiaGioCB: data.giaTheoGio || null,
+        },
+        { where: { MaPhong: maPhong }, transaction }
+      );
+
+      // Cập nhật tiện ích phòng
+      if (data.tienIch && data.tienIch.length > 0) {
+        // Xoá hết tiện ích cũ
+        await db.Phong_TienIch.destroy({
+          where: { MaPhong: maPhong },
+          transaction,
+        });
+
+        // Thêm lại tiện ích mới
+        const tienIch = data.tienIch || [];
+        tienIch.forEach(async (maTienIch) => {
+          await db.Phong_TienIch.create(
+            {
+              MaPhong: data.maPhong,
+              MaTienIch: maTienIch,
+            },
+            { transaction }
+          );
+        });
+      }
+
+      // Cập nhật giá tuần
+      if (data.giaThu && data.giaThu.length > 0) {
+        for (const item of data.giaThu) {
+          if (!item || !item.thu) continue;
+
+          await db.GiaPhongTuan.update(
+            {
+              GiaNgay: item.giaNgay || null,
+              GiaGio: item.giaGio || null,
+            },
+            {
+              where: {
+                MaPhong: maPhong,
+                ThuApDung: item.thu,
+              },
+              transaction,
+            }
+          );
+        }
+      }
+
+      // Cập nhật giá ngày lễ
+      if (data.giaLe && data.giaLe.length > 0) {
+        for (const item of data.giaLe) {
+          if (!item || !item.ten) continue;
+
+          await db.GiaPhongNgayLe.update(
+            {
+              NgayBatDau: item.start,
+              NgayKetThuc: item.end || null,
+              GiaNgay: item.giaNgay || null,
+              GiaGio: item.giaGio || null,
+            },
+            {
+              where: {
+                MaPhong: maPhong,
+                NgayLe: item.ten,
+              },
+              transaction,
+            }
+          );
+        }
+      }
+
+      // Xóa hình ảnh đã chọn
+      if (data.deletedImages && data.deletedImages.length > 0) {
+        await db.HinhAnh.destroy({
+          where: {
+            MaHinhAnh: data.deletedImages,
+          },
+          transaction,
+        });
+      }
+
+      // Nếu có file mới được tải lên
+      if (files && files.length > 0) {
+        // upload hình ảnh phòng lên cloudinary
+        const uploadPromises = files.map((file) => {
+          return new Promise((resolve, reject) => {
+            cloudinary.uploader
+              .upload_stream(
+                {
+                  folder: "hotel/phong",
+                  public_id: `${maPhong}_${Date.now()}`,
+                },
+                async (error, result) => {
+                  if (error) reject(error);
+                  else resolve(result.secure_url);
+                }
+              )
+              .end(file.buffer);
+          });
+        });
+
+        const imageUrls = await Promise.all(uploadPromises);
+
+        // lưu hình ảnh vào bảng HinhAnh
+        await db.HinhAnh.bulkCreate(
+          imageUrls.map((url) => ({
+            MaPhong: maPhong,
+            ImgURL: url,
+          })),
+          { transaction }
+        );
+      }
+
+      await transaction.commit();
+      return {
+        success: true,
+        message: "Cập nhật phòng thành công",
+      };
+    } catch (error) {
+      await transaction.rollback();
+      console.error("Error updating room in PhongDAO:", error);
       throw error;
     }
   }

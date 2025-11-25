@@ -65,7 +65,7 @@ class Phong extends Model {
     const now = new Date();
     const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
-    const weekday = today.getDay() === 0 ? 8 : today.getDay() + 1;
+    const weekday = today.getDay() === 0 ? 8 : today.getDay();
 
     // Ưu tiên giá ngày lễ
     if (this.GiaPhongNgayLe) {
@@ -96,7 +96,7 @@ class Phong extends Model {
     const now = new Date();
     const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
-    const weekday = today.getDay() === 0 ? 8 : today.getDay() + 1;
+    const weekday = today.getDay() === 0 ? 8 : today.getDay();
 
     // Ưu tiên giá ngày lễ
     if (this.GiaPhongNgayLe) {
@@ -115,7 +115,9 @@ class Phong extends Model {
       const found = this.GiaPhongTuan.find(
         (g) => Number(g.ThuApDung) === weekday
       );
-      if (found) return found.GiaGio ?? this.GiaGioCB;
+      if (found) {
+        return found.GiaGio ?? this.GiaGioCB;
+      }
     }
 
     // Không có giá đặc biệt thì dùng giá cơ bản

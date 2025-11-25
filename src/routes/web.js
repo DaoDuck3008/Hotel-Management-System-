@@ -19,6 +19,12 @@ const initWebRoutes = (app) => {
   router.post("/rooms", upload.array("images", 20), PhongController.store);
   router.get("/rooms/:maPhong", PhongController.detail);
   router.delete("/rooms/:maPhong", PhongController.destroy);
+  router.get("/rooms/:maPhong/edit", PhongController.edit);
+  router.put(
+    "/rooms/:maPhong",
+    upload.array("images", 20),
+    PhongController.update
+  );
 
   return app.use("/", router);
 };

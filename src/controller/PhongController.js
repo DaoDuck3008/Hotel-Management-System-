@@ -56,9 +56,61 @@ const detail = async (req, res) => {
   res.render("Phong/detail.ejs", { room: room });
 };
 
-const edit = (req, res) => {};
+const edit = async (req, res) => {
+  const { maPhong } = req.params;
 
-const update = (req, res) => {};
+  const roomTypes = await db.LoaiPhong.findAll();
+  const amenities = await db.TienIch.findAll();
+  const room = await PhongDao.getById(maPhong);
+
+  // const _room = room ? room.toJSON() : null;
+  // console.log(">>> room edit:", _room);
+
+  if (!room) {
+    req.flash("error", "Phòng không tồn tại!");
+    return res.redirect("/rooms");
+  }
+
+  return res.render("Phong/edit.ejs", { room, roomTypes, amenities });
+};
+
+const update = async (req, res) => {
+  try {
+    // Kiểm tra phòng tồn tại trước
+    const { maPhong } = req.params;
+    const room = await PhongDao.getById(maPhong);
+
+    if (!room) {
+      req.flash("error", "Phòng không tồn tại!");
+      return res.redirect("/rooms");
+    }
+
+    // Gọi validator để kiểm tra dữ liệu đầu vào
+    const { error } = createRoomSchema.validate(req.body, {
+      abortEarly: false,
+      convert: true,
+    });
+    if (error) {
+      req.flash(
+        "error",
+        error.details.map((err) => err.message)
+      );
+      return res.redirect("/rooms/" + maPhong + "/edit");
+    }
+
+    const result = await PhongDao.update(maPhong, req.body, req.files);
+
+    if (!result.success) {
+      req.flash("error", "Cập nhật phòng thất bại!");
+      return res.redirect("/rooms");
+    }
+
+    return res.redirect("/rooms");
+  } catch (error) {
+    console.error("Error in update PhongController:", error);
+    return res.redirect("/rooms");
+  }
+};
 
 const destroy = async (req, res) => {
   try {
