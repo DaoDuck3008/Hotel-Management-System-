@@ -264,6 +264,18 @@
                   <span class="detail-label">Thuế VAT:</span>
                   <span class="detail-value">10%</span>
                 </div>
+
+                <!-- Nút "Xem chi tiết giá" -->
+                <div class="mt-3 d-flex justify-content-end color-white">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#priceDetailModal"
+                  >
+                    Xem chi tiết giá
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -329,6 +341,95 @@
               <i class="fas fa-calendar-check me-2"></i>
               Đặt phòng ngay
             </button> -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal xem chi tiết giá -->
+      <div class="modal fade" id="priceDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title">
+                <i class="fas fa-tags me-2"></i> Chi tiết giá phòng
+              </h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+
+            <div class="modal-body p-4">
+              <!-- Giá theo ngày trong tuần -->
+              <h5 class="mb-3">
+                <i class="fas fa-calendar-week text-primary me-2"></i> Giá theo
+                từng ngày
+              </h5>
+
+              <div class="table-responsive mb-4">
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Thứ</th>
+                      <th>Giá ngày (VND)</th>
+                      <th>Giá giờ (VND)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if(room.GiaPhongTuan && room.GiaPhongTuan.length >0) {
+                    room.GiaPhongTuan.forEach(gia => { %>
+                    <tr>
+                      <td>
+                        <%= gia.ThuApDung === 8 ? 'Chủ nhật' : `Thứ
+                        ${gia.ThuApDung}` %>
+                      </td>
+                      <td><%= gia.GiaNgay.toLocaleString() %> VMĐ</td>
+                      <td>
+                        <%= gia.GiaGio ? gia.GiaGio.toLocaleString() : "-" %>
+                      </td>
+                    </tr>
+                    <% }) } %>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Giá theo ngày lễ -->
+              <h5 class="mb-3">
+                <i class="fas fa-gift text-danger me-2"></i> Giá ngày lễ
+              </h5>
+
+              <% if(room.GiaPhongNgayLe && room.GiaPhongNgayLe.length > 0) { %>
+              <div class="list-group mb-3">
+                <% room.GiaPhongNgayLe.forEach(le => { %>
+                <div
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <strong class="text-danger"><%= le.NgayLe %></strong><br />
+                    <small class="text-muted">
+                      <%= le.NgayBatDau %> - <%= le.NgayKetThuc %>
+                    </small>
+                  </div>
+                  <span class="fw-bold text-danger">
+                    Giá ngày: <%= le.GiaNgay.toLocaleString() %> VNĐ - Giá giờ:
+                    <%= le.GiaGio ? le.GiaGio.toLocaleString() : "-" %> VNĐ
+                  </span>
+                </div>
+                <% }) %>
+              </div>
+              <% } else { %>
+              <p class="text-muted fst-italic">
+                Không có ngày lễ cho phòng này.
+              </p>
+              <% } %>
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       </div>
