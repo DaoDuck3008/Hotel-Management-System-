@@ -51,7 +51,7 @@ const detail = async (req, res) => {
 
   const _room = room ? room.toJSON() : null;
 
-  console.log(">>> room detail:", _room);
+  // console.log(">>> room detail:", _room);
 
   res.render("Phong/detail.ejs", { room: room });
 };
@@ -60,6 +60,44 @@ const edit = (req, res) => {};
 
 const update = (req, res) => {};
 
-const destroy = (req, res) => {};
+const destroy = async (req, res) => {
+  try {
+    // console.log(">>> delete room: ", req.params);
+    const { maPhong } = req.params;
 
-module.exports = { create, detail, edit, update, destroy, index, store };
+    const room = await PhongDao.getById(maPhong);
+
+    if (!room) {
+      return res
+        .status(404)
+        .json({ message: "Phòng không tồn tại!", success: false });
+    }
+
+    const result = await PhongDao.delete(maPhong);
+
+    if (!result.success) {
+      return res
+        .status(500)
+        .json({ message: "Xóa phòng thất bại!", success: false });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Xóa phòng thành công!", success: true });
+  } catch (error) {
+    console.error("Error in delete PhongController:", error);
+    return res
+      .status(500)
+      .json({ message: "Xóa phòng thất bại!", success: false });
+  }
+};
+
+module.exports = {
+  create,
+  detail,
+  edit,
+  update,
+  destroy,
+  index,
+  store,
+};

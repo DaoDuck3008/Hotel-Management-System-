@@ -318,7 +318,10 @@
               <i class="fas fa-edit me-2"></i>
               Chỉnh sửa
             </button>
-            <button class="btn btn-outline-danger action-btn">
+            <button
+              class="btn btn-outline-danger action-btn"
+              onclick="showDeleteModal('<%= room.MaPhong %>','<%= room.TenPhong %>')"
+            >
               <i class="fas fa-trash me-2"></i>
               Xóa phòng
             </button>
@@ -326,6 +329,40 @@
               <i class="fas fa-calendar-check me-2"></i>
               Đặt phòng ngay
             </button> -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal xác nhận xóa -->
+      <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Xác nhận xóa</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p id="deleteMessage">
+                Bạn có chắc chắn muốn xóa phòng này không?
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Hủy
+              </button>
+
+              <button type="button" id="confirmDelete" class="btn btn-danger">
+                Xóa
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -347,6 +384,44 @@
           imageModal.show(); // Mở modal
         });
       });
+
+      // Mở modal xác nhận xóa
+      function showDeleteModal(roomId, roomName) {
+        currentRoomToDelete = roomId;
+        document.getElementById(
+          "deleteMessage"
+        ).textContent = `Bạn có chắc chắn muốn xóa phòng "${roomName}"? Hành động này không thể hoàn tác.`;
+        const deleteModal = new bootstrap.Modal(
+          document.getElementById("deleteModal")
+        );
+        deleteModal.show();
+      }
+
+      // Delete Confirmation
+      document
+        .getElementById("confirmDelete")
+        .addEventListener("click", deleteRoom);
+
+      async function deleteRoom() {
+        if (currentRoomToDelete) {
+          // Gửi yêu cầu xóa đến server
+          const res = await fetch(`/rooms/${currentRoomToDelete}`, {
+            method: "DELETE",
+          }).catch((error) => {
+            console.error("Error:", error);
+            alert("Có lỗi xảy ra khi xóa phòng");
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            alert(data.message);
+            location.replace("/rooms");
+          } else {
+            alert("Xóa thất bại!");
+          }
+        }
+      }
     </script>
   </body>
 </html>

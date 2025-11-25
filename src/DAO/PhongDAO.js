@@ -9,6 +9,8 @@ class PhongDAO {
         include: [
           { model: db.LoaiPhong, as: "LoaiPhong" },
           { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
+          { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
+          { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
           { model: db.HinhAnh, as: "HinhAnh" },
         ],
       });
@@ -171,6 +173,23 @@ class PhongDAO {
       return room;
     } catch (error) {
       console.error("Error fetching room by ID in PhongDAO:", error);
+      throw error;
+    }
+  }
+
+  // Xoá phòng theo mã phòng
+  static async delete(maPhong) {
+    try {
+      await db.Phong.destroy({
+        where: { MaPhong: maPhong },
+      });
+
+      return {
+        success: true,
+        message: "Xoá phòng thành công",
+      };
+    } catch (error) {
+      console.error("Error deleting room in PhongDAO:", error);
       throw error;
     }
   }
