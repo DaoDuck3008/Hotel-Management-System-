@@ -52,7 +52,7 @@ class Phong extends Model {
     this.belongsToMany(models.TienIch, {
       through: models.Phong_TienIch,
       foreignKey: "MaPhong",
-      otherKey: "TenTienIch",
+      otherKey: "MaTienIch",
       as: "TienIch",
     });
   }

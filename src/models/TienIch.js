@@ -35,6 +35,8 @@ class TienIch extends Model {
     this.belongsToMany(models.Phong, {
       through: models.Phong_TienIch,
       foreignKey: "MaTienIch",
+      otherKey: "MaPhong",
+      as: "Phong",
     });
   }
 }

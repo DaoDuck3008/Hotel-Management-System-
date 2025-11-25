@@ -19,6 +19,7 @@ class PhongDAO {
     }
   }
 
+  // Tạo phòng mới
   static async create(data, files) {
     const transaction = await db.sequelize.transaction();
     try {
@@ -40,13 +41,15 @@ class PhongDAO {
         { transaction }
       );
 
+      // Lấy giờ ở VN hiện tại
+      const now = new Date();
+      const vietnamTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+
       // lưu trạng thái phòng là "Trống"
       await db.TrangThaiPhong.create(
         {
           MaPhong: data.maPhong,
-          ThoiGianCapNhat: new Date().toLocaleString("en-CA", {
-            timeZone: "Asia/Ho_Chi_Minh",
-          }),
+          ThoiGianCapNhat: vietnamTime,
           TrangThai: "Empty",
         },
         { transaction }
@@ -123,6 +126,7 @@ class PhongDAO {
         });
 
         const imageUrls = await Promise.all(uploadPromises);
+        console.log(">>> Uploaded image URLs:", imageUrls);
 
         // lưu hình ảnh vào bảng HinhAnh
         await db.HinhAnh.bulkCreate(
@@ -142,6 +146,31 @@ class PhongDAO {
     } catch (error) {
       await transaction.rollback();
       console.error("Error creating room in PhongDAO:", error);
+      throw error;
+    }
+  }
+
+  // Lấy phòng theo mã phòng
+  static async getById(maPhong) {
+    try {
+      const room = await db.Phong.findOne({
+        where: { MaPhong: maPhong },
+        include: [
+          { model: db.LoaiPhong, as: "LoaiPhong" },
+          { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
+          { model: db.HinhAnh, as: "HinhAnh" },
+          { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
+          { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
+          {
+            model: db.TienIch,
+            as: "TienIch",
+            through: { attributes: [] },
+          },
+        ],
+      });
+      return room;
+    } catch (error) {
+      console.error("Error fetching room by ID in PhongDAO:", error);
       throw error;
     }
   }

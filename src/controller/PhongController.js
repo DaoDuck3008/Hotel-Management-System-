@@ -44,7 +44,17 @@ const store = async (req, res) => {
   }
 };
 
-const detail = (req, res) => {};
+const detail = async (req, res) => {
+  const { maPhong } = req.params;
+
+  const room = await PhongDao.getById(maPhong);
+
+  const _room = room ? room.toJSON() : null;
+
+  console.log(">>> room detail:", _room);
+
+  res.json(room);
+};
 
 const edit = (req, res) => {};
 

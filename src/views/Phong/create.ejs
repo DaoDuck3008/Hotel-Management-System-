@@ -661,46 +661,67 @@
           }
         });
 
-      // Xử lý upload ảnh
+      // Xử lý upload và preview ảnh
       const imageUpload = document.getElementById("imageUpload");
       const imageInput = document.getElementById("imageInput");
       const imagePreview = document.getElementById("imagePreview");
 
+      let allFiles = [];
+
+      // Click vào vùng upload → mở input file
       imageUpload.addEventListener("click", () => {
         imageInput.click();
       });
 
+      // Khi chọn ảnh
       imageInput.addEventListener("change", function (e) {
-        const files = e.target.files;
+        const newFiles = Array.from(e.target.files);
 
-        for (let file of files) {
-          if (file.type.startsWith("image/")) {
-            const reader = new FileReader();
+        // Gộp file mới + file cũ
+        allFiles = allFiles.concat(newFiles);
 
-            reader.onload = function (e) {
-              const previewItem = document.createElement("div");
-              previewItem.className = "preview-item";
-              previewItem.innerHTML = `
-                            <img src="${e.target.result}" alt="Preview">
-                            <button type="button" class="remove-image">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-              imagePreview.appendChild(previewItem);
-            };
+        // Tạo FileList mới
+        const dt = new DataTransfer();
+        allFiles.forEach((f) => dt.items.add(f));
+        imageInput.files = dt.files;
 
-            reader.readAsDataURL(file);
-          }
-        }
+        // Tạo preview cho file mới
+        newFiles.forEach((file) => {
+          if (!file.type.startsWith("image/")) return;
+
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const previewItem = document.createElement("div");
+            previewItem.className = "preview-item";
+            previewItem.innerHTML = `
+        <img src="${ev.target.result}">
+        <button type="button" class="remove-image">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+            imagePreview.appendChild(previewItem);
+          };
+          reader.readAsDataURL(file);
+        });
       });
 
-      // Xử lý xóa ảnh preview
+      // Xóa ảnh
       document.addEventListener("click", function (e) {
-        if (e.target.closest(".remove-image")) {
-          e.preventDefault();
-          const previewItem = e.target.closest(".preview-item");
-          previewItem.remove();
-        }
+        const btn = e.target.closest(".remove-image");
+        if (!btn) return;
+
+        const previewItem = btn.closest(".preview-item");
+        const index = Array.from(imagePreview.children).indexOf(previewItem);
+
+        // Xóa file tương ứng
+        allFiles.splice(index, 1);
+
+        // Gán lại FileList
+        const dt = new DataTransfer();
+        allFiles.forEach((f) => dt.items.add(f));
+        imageInput.files = dt.files;
+
+        previewItem.remove();
       });
     </script>
   </body>
