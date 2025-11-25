@@ -53,7 +53,7 @@ const detail = async (req, res) => {
 
   console.log(">>> room detail:", _room);
 
-  res.json(room);
+  res.render("Phong/detail.ejs", { room: room });
 };
 
 const edit = (req, res) => {};
