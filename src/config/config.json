@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "freedb_daoanhduc@123",
-    "password": "?zcjP$$S45#5TNq",
-    "database": "freedb_htqlks",
-    "host": "sql.freedb.tech",
+    "username": "user1",
+    "password": "Anhduc@123",
+    "database": "htqlks",
+    "host": "103.166.183.113",
     "dialect": "mysql",
     "define": {
       "freezeTableName": true
