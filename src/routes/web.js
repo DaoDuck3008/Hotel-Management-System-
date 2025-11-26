@@ -1,5 +1,6 @@
 import express from "express";
 import PhongController from "../controller/PhongController.js";
+import LeTanController from "../controller/LeTanController.js";
 import upload from "../middlewares/upload.js";
 
 const router = express.Router();
@@ -25,6 +26,12 @@ const initWebRoutes = (app) => {
     upload.array("images", 20),
     PhongController.update
   );
+
+  // LeTan routes
+  router.get("/reception", LeTanController.index);
+
+  // Cập nhật trạng thái phòng
+  router.put("/reception/update-status/:maPhong", LeTanController.updateStatus);
 
   return app.use("/", router);
 };
