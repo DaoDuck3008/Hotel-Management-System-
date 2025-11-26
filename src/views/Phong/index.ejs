@@ -151,7 +151,11 @@
                 <button class="btn btn-outline-secondary me-3" id="menuToggle">
                   <i class="fas fa-bars"></i>
                 </button>
-                <h2 class="h4 mb-0 text-dark">Quản lý Phòng</h2>
+                <h2 class="h4 mb-0 text-dark">
+                  <a href="/rooms" class="text-decoration-none"
+                    >Quản lý Phòng</a
+                  >
+                </h2>
               </div>
 
               <div class="d-flex align-items-center gap-3">
@@ -163,7 +167,9 @@
                     type="text"
                     class="form-control border-start-0"
                     id="searchInput"
+                    name="keyword"
                     placeholder="Tìm kiếm phòng..."
+                    form="searchForm"
                   />
                 </div>
                 <button class="btn btn-outline-secondary" id="filterToggle">
@@ -180,63 +186,77 @@
           <!-- Form tìm kiếm -->
           <div class="filter-section bg-white border-bottom" id="filterSection">
             <div class="container-fluid p-4">
-              <div class="row g-3 mb-3">
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">Loại phòng</label>
-                  <select class="form-select" id="roomTypeFilter">
-                    <option value="">Tất cả loại phòng</option>
+              <form id="searchForm" method="get" action="/rooms/search">
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">Loại phòng</label>
+                    <select
+                      class="form-select"
+                      name="loaiPhong"
+                      id="roomTypeFilter"
+                    >
+                      <option value="">Tất cả loại phòng</option>
 
-                    <% roomTypes.forEach(type => { %>
-                    <option value="<%= type %>"><%= type %></option>
-                    <% }) %>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-medium"
-                    >Khoảng giá theo ngày</label
-                  >
-                  <div class="row g-2">
-                    <div class="col">
-                      <input
-                        type="number"
-                        class="form-control"
-                        id="minPrice"
-                        placeholder="Giá thấp nhất"
-                        min="0"
-                      />
-                    </div>
-                    <div class="col-auto d-flex align-items-center">
-                      <span class="text-muted">-</span>
-                    </div>
-                    <div class="col">
-                      <input
-                        type="number"
-                        class="form-control"
-                        id="maxPrice"
-                        placeholder="Giá cao nhất"
-                        min="0"
-                      />
+                      <% roomTypes.forEach(type => { %>
+                      <option value="<%= type.TenLoaiPhong %>">
+                        <%= type.TenLoaiPhong %>
+                      </option>
+                      <% }) %>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium"
+                      >Khoảng giá theo ngày</label
+                    >
+                    <div class="row g-2">
+                      <div class="col">
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="minPrice"
+                          name="giaTu"
+                          placeholder="Giá thấp nhất"
+                          min="0"
+                        />
+                      </div>
+                      <div class="col-auto d-flex align-items-center">
+                        <span class="text-muted">-</span>
+                      </div>
+                      <div class="col">
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="maxPrice"
+                          name="giaDen"
+                          placeholder="Giá cao nhất"
+                          min="0"
+                        />
+                      </div>
                     </div>
                   </div>
+                  <div class="col">
+                    <label class="form-label fw-medium"
+                      >Sức chứa tối thiểu</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="sucChua"
+                      name="sucChua"
+                      placeholder="Sức chứa tối thiểu"
+                      min="1"
+                    />
+                  </div>
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">Trạng thái</label>
-                  <select class="form-select" id="statusFilter">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="Trống">Trống</option>
-                    <option value="Đã đặt">Đã đặt</option>
-                    <option value="Đang sử dụng">Đang sử dụng</option>
-                  </select>
+                <div class="d-flex justify-content-end gap-2">
+                  <button class="btn btn-outline-secondary" id="resetFilters">
+                    Đặt lại
+                  </button>
+                  <button class="btn btn-primary" id="applyFilters">
+                    Áp dụng
+                  </button>
                 </div>
-              </div>
-              <div class="d-flex justify-content-end gap-2">
-                <button class="btn btn-outline-secondary" id="resetFilters">
-                  Đặt lại
-                </button>
-                <button class="btn btn-primary" id="applyFilters">
-                  Áp dụng
-                </button>
-              </div>
+              </form>
             </div>
           </div>
 
@@ -244,12 +264,13 @@
           <div class="content p-4">
             <% if (rooms && rooms.length > 0) { %>
             <div class="row g-4" id="roomGrid">
-              <% rooms.forEach(function(room) { %>
+              <% rooms.forEach(room => { if (!room) return; %>
+
               <div class="col-xl-4 col-lg-6 col-md-6">
                 <div class="card room-card h-100">
                   <div class="room-image position-relative">
                     <img
-                      src="<%= room.HinhAnh[0].ImgURL %>"
+                      src="<%= room.HinhAnh[0].ImgURL ? room.HinhAnh[0].ImgURL : '../../../../public/og.png' %>"
                       class="card-img-top"
                       alt="<%= room.tenPhong %>"
                     />
@@ -367,83 +388,6 @@
           style: "currency",
           currency: "VND",
         }).format(amount);
-      }
-
-      function filterRooms() {
-        const roomType = document.getElementById("roomTypeFilter").value;
-        const minPrice = document.getElementById("minPrice").value;
-        const maxPrice = document.getElementById("maxPrice").value;
-        const status = document.getElementById("statusFilter").value;
-        const searchTerm = document
-          .getElementById("searchInput")
-          .value.toLowerCase();
-        const roomCards = document.querySelectorAll(".room-card");
-
-        let visibleCount = 0;
-
-        roomCards.forEach((card) => {
-          const roomElement = card.closest(".col-xl-4");
-          const roomTitle = card
-            .querySelector(".card-title")
-            .textContent.toLowerCase();
-          const roomCode = card
-            .querySelector(".room-code")
-            .textContent.toLowerCase();
-          const roomTypeText = card
-            .querySelector(".card-text strong")
-            .textContent.toLowerCase();
-          const roomPrice = parseInt(
-            card
-              .querySelector(".text-primary")
-              .textContent.replace(/[^\d]/g, "")
-          );
-          const roomStatus = card.querySelector(".room-status").textContent;
-
-          let shouldShow = true;
-
-          // Filter by room type
-          if (roomType && roomTypeText !== roomType.toLowerCase()) {
-            shouldShow = false;
-          }
-
-          // Filter by price range
-          if (minPrice && roomPrice < parseInt(minPrice)) {
-            shouldShow = false;
-          }
-          if (maxPrice && roomPrice > parseInt(maxPrice)) {
-            shouldShow = false;
-          }
-
-          // Filter by status
-          if (status && roomStatus !== status) {
-            shouldShow = false;
-          }
-
-          // Filter by search term
-          if (
-            searchTerm &&
-            !roomTitle.includes(searchTerm) &&
-            !roomCode.includes(searchTerm) &&
-            !roomTypeText.includes(searchTerm)
-          ) {
-            shouldShow = false;
-          }
-
-          if (shouldShow) {
-            roomElement.style.display = "block";
-            visibleCount++;
-          } else {
-            roomElement.style.display = "none";
-          }
-        });
-
-        // Show no results message
-        const noResults = document.getElementById("noResults");
-        if (visibleCount === 0) {
-          noResults.style.display = "block";
-        } else {
-          noResults.style.display = "none";
-        }
       }
 
       function resetFilters() {
