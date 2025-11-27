@@ -32,14 +32,28 @@ const initWebRoutes = (app) => {
     PhongController.update
   ); // Cập nhật phòng
 
-  // ==== LeTan routes =====
-  router.get("/reception", LeTanController.index); // Trang lễ tân
-  router.put("/reception/update-status/:maPhong", LeTanController.updateStatus); // Cập nhật trạng thái phòng từ lễ tân
+  // Bộ phận lễ tân
+  router.get("/receptions", LeTanController.index);
+  router.put(
+    "/receptions/update-status/:maPhong",
+    LeTanController.updateStatus
+  );
+  router.get("/receptions/payment", LeTanController.paymentList);
+  router.get("/receptions/payment/:maDatPhong", LeTanController.paymentDetail);
+  router.post(
+    "/receptions/payment/:maDatPhong",
+    LeTanController.processPayment
+  );
 
   //BookRooms
   router.get("/bookings", DatPhongController.index);
   router.get("/bookings/create", DatPhongController.create);
   router.get("/bookings/:maDatPhong", DatPhongController.detail);
+  router.post("/bookings/create", DatPhongController.createPost);
+  router.get("/bookings/:maDatPhong/edit", DatPhongController.editForm); // GET form
+  router.post("/bookings/:maDatPhong/edit", DatPhongController.edit); // POST form
+  router.post("/bookings/:maDatPhong/delete", DatPhongController.destroy);
+
   return app.use("/", router);
 };
 
