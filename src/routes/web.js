@@ -27,11 +27,18 @@ const initWebRoutes = (app) => {
     PhongController.update
   );
 
-  // LeTan routes
-  router.get("/reception", LeTanController.index);
-
-  // Cập nhật trạng thái phòng
-  router.put("/reception/update-status/:maPhong", LeTanController.updateStatus);
+  // Bộ phận lễ tân
+  router.get("/receptions", LeTanController.index);
+  router.put(
+    "/receptions/update-status/:maPhong",
+    LeTanController.updateStatus
+  );
+  router.get("/receptions/payment", LeTanController.paymentList);
+  router.get("/receptions/payment/:maDatPhong", LeTanController.paymentDetail);
+  router.post(
+    "/receptions/payment/:maDatPhong",
+    LeTanController.processPayment
+  );
 
   return app.use("/", router);
 };
