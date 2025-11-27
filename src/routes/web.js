@@ -39,6 +39,11 @@ const initWebRoutes = (app) => {
   router.get("/bookings", DatPhongController.index);
   router.get("/bookings/create", DatPhongController.create);
   router.get("/bookings/:maDatPhong", DatPhongController.detail);
+  router.post("/bookings/create", DatPhongController.createPost);
+  router.get("/bookings/:maDatPhong/edit", DatPhongController.editForm); // GET form
+  router.post("/bookings/:maDatPhong/edit", DatPhongController.edit); // POST form
+  router.post("/bookings/:maDatPhong/delete", DatPhongController.destroy);
+
   return app.use("/", router);
 };
 

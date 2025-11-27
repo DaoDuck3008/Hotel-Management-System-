@@ -106,13 +106,16 @@ class DatPhongDAO {
         include: [
           {
             model: db.KhachHang,
+            as: "KhachHang",
             attributes: ["MaKhachHang", "HoVaTen", "SDT", "Email", "GioiTinh"],
           },
           {
             model: db.ChiTietDatPhong,
+            as: "ChiTiet",
             include: [
               {
                 model: db.Phong,
+                as: "Phong",
                 include: [{ model: db.LoaiPhong, as: "LoaiPhong" }],
               },
               {
@@ -239,13 +242,25 @@ class DatPhongDAO {
   // Tạo khách hàng mới
   static async createCustomer(customerData) {
     try {
+      // Lấy mã KH cao nhất hiện tại
+      const lastCustomer = await db.KhachHang.findOne({
+        order: [["MaKhachHang", "DESC"]],
+      });
+
+      let newMaKhachHang = "KH001"; // Mặc định nếu chưa có khách hàng nào
+      if (lastCustomer) {
+        const lastNumber = parseInt(lastCustomer.MaKhachHang.slice(2)); // Lấy phần số
+        const nextNumber = lastNumber + 1;
+        newMaKhachHang = "KH" + nextNumber.toString().padStart(3, "0"); // Ví dụ KH004
+      }
+
       const newCustomer = await db.KhachHang.create({
+        MaKhachHang: newMaKhachHang,
         HoVaTen: customerData.HoVaTen,
         SDT: customerData.SDT,
         Email: customerData.Email,
         GioiTinh: customerData.GioiTinh || null,
         NgaySinh: customerData.NgaySinh || null,
-        DiaChi: customerData.DiaChi || null,
       });
 
       return { success: true, customer: newCustomer };
@@ -279,6 +294,139 @@ class DatPhongDAO {
       throw error;
     }
   }
-}
+  static async getNewCustomers() {
+    try {
+      const customers = await db.KhachHang.findAll({
+        attributes: [
+          "MaKhachHang",
+          "HoVaTen",
+          "SDT",
+          "Email",
+          "GioiTinh",
+          "NgaySinh",
+        ],
+        order: [["createdAt", "DESC"]],
+        limit: 10,
+      });
+      return customers;
+    } catch (error) {
+      console.error("Error fetching new customers:", error);
+      throw error;
+    }
+  }
+  static async getAllCustomers() {
+    try {
+      return await db.KhachHang.findAll({
+        attributes: ["MaKhachHang", "HoVaTen", "SDT", "Email", "GioiTinh"],
+      });
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      throw error;
+    }
+  }
+  static async deleteBooking(maDatPhong) {
+    try {
+      const result = await db.DatPhong.destroy({
+        where: { MaDatPhong: maDatPhong },
+      });
+      if (result) {
+        return { success: true, message: "Xóa đơn thành công!" };
+      } else {
+        return { success: false, message: "Đơn không tồn tại!" };
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      return { success: false, message: "Xóa thất bại!" };
+    }
+  }
 
+  //Cập nhật edit vào db
+  static async updateBooking(maDatPhong, data) {
+    const t = await db.sequelize.transaction();
+
+    try {
+      // 1. Lấy booking
+      const booking = await db.DatPhong.findOne({
+        where: { MaDatPhong: maDatPhong },
+        transaction: t,
+      });
+
+      if (!booking) {
+        await t.rollback();
+        return { success: false, message: "Không tìm thấy đơn đặt phòng" };
+      }
+
+      // 2. Cập nhật thông tin khách hàng
+      await db.KhachHang.update(
+        {
+          HoVaTen: data.HoVaTen,
+          GioiTinh: data.GioiTinh,
+          NgaySinh: data.NgaySinh || null,
+          SDT: data.SDT,
+          Email: data.Email,
+        },
+        { where: { MaKhachHang: booking.MaKhachHang }, transaction: t }
+      );
+
+      // 3. Cập nhật thông tin đặt phòng
+      await booking.update(
+        {
+          NgayDat: data.NgayDat,
+          NgayNhanPhong: data.NgayNhanPhong,
+          NgayTraPhong: data.NgayTraPhong,
+        },
+        { transaction: t }
+      );
+
+      // 4. Xóa chi tiết phòng cũ
+      await db.ChiTietDatPhong.destroy({
+        where: { MaDatPhong: maDatPhong },
+        transaction: t,
+      });
+
+      // 5. Thêm chi tiết phòng mới
+      if (data.ChiTiet) {
+        // Ép ChiTiet thành array nếu chỉ có 1 phòng
+        const chiTietArray = Array.isArray(data.ChiTiet)
+          ? data.ChiTiet
+          : [data.ChiTiet];
+
+        for (const detail of chiTietArray) {
+          await db.ChiTietDatPhong.create(
+            {
+              MaDatPhong: maDatPhong,
+              MaPhong: detail.MaPhong,
+              GiaNgay: detail.GiaNgay || 0,
+              GiaGio: detail.GiaGio || 0,
+            },
+            { transaction: t }
+          );
+        }
+      }
+
+      await t.commit();
+      return { success: true };
+    } catch (err) {
+      await t.rollback();
+      console.error("Error update booking:", err);
+      return { success: false, message: err.message };
+    }
+  }
+
+  static async deleteBooking(maDatPhong) {
+    try {
+      const result = await db.DatPhong.destroy({
+        where: { MaDatPhong: maDatPhong },
+      });
+      if (result) {
+        return { success: true, message: "Xóa đơn thành công!" };
+      } else {
+        return { success: false, message: "Đơn không tồn tại!" };
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      return { success: false, message: "Xóa thất bại!" };
+    }
+  }
+}
 module.exports = DatPhongDAO;
