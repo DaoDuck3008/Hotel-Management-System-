@@ -2,6 +2,7 @@ import express from "express";
 import PhongController from "../controller/PhongController.js";
 import LeTanController from "../controller/LeTanController.js";
 import upload from "../middlewares/upload.js";
+import DatPhongController from "../controller/DatPhongController.js";
 
 const router = express.Router();
 
@@ -16,6 +17,9 @@ const initWebRoutes = (app) => {
   });
 
   router.get("/rooms", PhongController.index);
+  router.get("/rooms/statistics", PhongController.statistics);
+  router.get("/rooms/statistics/export", PhongController.exportExcel);
+  router.get("/rooms/search", PhongController.search);
   router.get("/rooms/create", PhongController.create);
   router.post("/rooms", upload.array("images", 20), PhongController.store);
   router.get("/rooms/:maPhong", PhongController.detail);
@@ -40,6 +44,10 @@ const initWebRoutes = (app) => {
     LeTanController.processPayment
   );
 
+  //BookRooms
+  router.get("/bookings", DatPhongController.index);
+  router.get("/bookings/create", DatPhongController.create);
+  router.get("/bookings/:maDatPhong", DatPhongController.detail);
   return app.use("/", router);
 };
 
