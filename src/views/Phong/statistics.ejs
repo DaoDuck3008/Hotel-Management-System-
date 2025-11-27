@@ -114,10 +114,14 @@
               Tổng quan về số lượng và giá cả các loại phòng
             </p>
           </div>
-          <button class="btn btn-success" onclick="exportToExcel()">
+          <a
+            href="/rooms/statistics/export"
+            class="btn btn-success"
+            onclick="exportToExcel()"
+          >
             <i class="fas fa-file-excel me-2"></i>
             Xuất Excel
-          </button>
+          </a>
         </div>
       </header>
 
@@ -223,9 +227,6 @@
         alert(
           'Đang xuất file Excel...\n\nFile "Thong_ke_phong.xlsx" đã được tải xuống!'
         );
-
-        // Trong thực tế, bạn sẽ tích hợp thư viện như SheetJS ở đây
-        // để thực sự xuất file Excel với dữ liệu thống kê
       }
     </script>
   </body>

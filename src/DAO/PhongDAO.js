@@ -417,6 +417,8 @@ class PhongDAO {
           "TenLoaiPhong",
           "GiaNgayCB",
           "GiaGioCB",
+          "SucChua",
+          "SoGiuong",
         ],
         raw: true,
       });
