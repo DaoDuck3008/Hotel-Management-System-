@@ -392,6 +392,65 @@ class PhongDAO {
       throw error;
     }
   }
+
+  static async statistics() {
+    try {
+      const { fn, col } = db.sequelize;
+
+      // 1) SQL xử lý thống kê theo loại phòng
+      const typeStats = await db.Phong.findAll({
+        attributes: [
+          "TenLoaiPhong",
+          [fn("COUNT", col("MaPhong")), "soLuong"],
+          [fn("AVG", col("GiaNgayCB")), "avgGiaNgay"],
+          [fn("AVG", col("GiaGioCB")), "avgGiaGio"],
+        ],
+        group: ["TenLoaiPhong"],
+        raw: true,
+      });
+
+      // 2) Lấy toàn bộ danh sách phòng
+      const rooms = await db.Phong.findAll({
+        attributes: [
+          "MaPhong",
+          "TenPhong",
+          "TenLoaiPhong",
+          "GiaNgayCB",
+          "GiaGioCB",
+          "SucChua",
+          "SoGiuong",
+        ],
+        raw: true,
+      });
+
+      // 3) Gộp phòng vào từng loại trong typeStats
+      const typeStatsWithRooms = typeStats.map((type) => {
+        return {
+          ...type,
+          rooms: rooms.filter((r) => r.TenLoaiPhong === type.TenLoaiPhong),
+        };
+      });
+
+      // 4) Thống kê toàn hệ thống
+      const systemStats = await db.Phong.findOne({
+        attributes: [
+          [fn("COUNT", col("MaPhong")), "totalRooms"],
+          [fn("AVG", col("GiaNgayCB")), "avgGiaNgaySystem"],
+          [fn("AVG", col("GiaGioCB")), "avgGiaGioSystem"],
+          [fn("SUM", col("GiaNgayCB")), "totalGiaTriNgay"],
+        ],
+        raw: true,
+      });
+
+      return {
+        typeStats: typeStatsWithRooms,
+        systemStats,
+      };
+    } catch (error) {
+      console.error("Error in PhongDAO.statistics:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = PhongDAO;

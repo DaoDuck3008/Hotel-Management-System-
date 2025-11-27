@@ -17,6 +17,8 @@ const initWebRoutes = (app) => {
   });
 
   router.get("/rooms", PhongController.index);
+  router.get("/rooms/statistics", PhongController.statistics);
+  router.get("/rooms/statistics/export", PhongController.exportExcel);
   router.get("/rooms/search", PhongController.search);
   router.get("/rooms/create", PhongController.create);
   router.post("/rooms", upload.array("images", 20), PhongController.store);
@@ -29,11 +31,18 @@ const initWebRoutes = (app) => {
     PhongController.update
   );
 
-  // LeTan routes
-  router.get("/reception", LeTanController.index);
-
-  // Cập nhật trạng thái phòng
-  router.put("/reception/update-status/:maPhong", LeTanController.updateStatus);
+  // Bộ phận lễ tân
+  router.get("/receptions", LeTanController.index);
+  router.put(
+    "/receptions/update-status/:maPhong",
+    LeTanController.updateStatus
+  );
+  router.get("/receptions/payment", LeTanController.paymentList);
+  router.get("/receptions/payment/:maDatPhong", LeTanController.paymentDetail);
+  router.post(
+    "/receptions/payment/:maDatPhong",
+    LeTanController.processPayment
+  );
 
   //BookRooms
   router.get("/bookings", DatPhongController.index);

@@ -1,6 +1,7 @@
 import PhongDao from "../DAO/PhongDAO.js";
 import db from "../models/index.js";
 import { createRoomSchema } from "../validators/PhongValidator.js";
+import ExcelJS from "exceljs";
 
 const index = async (req, res) => {
   const roomTypes = await db.LoaiPhong.findAll(); // lấy dữ liệu loại phòng
@@ -151,6 +152,110 @@ const search = async (req, res) => {
   return res.render("Phong/index.ejs", { rooms, roomTypes });
 };
 
+const statistics = async (req, res) => {
+  const { typeStats, systemStats } = await PhongDao.statistics();
+
+  // console.log(">>> typeStats:", typeStats);
+  // console.log(">>> systemStats:", systemStats);
+
+  return res.render("Phong/statistics.ejs", { typeStats, systemStats });
+};
+
+const exportExcel = async (req, res) => {
+  try {
+    // 1. Lấy dữ liệu thống kê
+    const { typeStats, systemStats } = await PhongDao.statistics();
+
+    // 2. Tạo workbook & sheet
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Thong ke phong");
+
+    // 3. Format chung
+    sheet.properties.defaultRowHeight = 22;
+
+    // GHI HEADER CHUNG
+    sheet.mergeCells("A1", "E1");
+    const title = sheet.getCell("A1");
+    title.value = "BÁO CÁO THỐNG KÊ PHÒNG";
+    title.font = { size: 16, bold: true };
+    title.alignment = { horizontal: "center", vertical: "middle" };
+    sheet.addRow([]);
+
+    // GHI DỮ LIỆU THEO TỪNG LOẠI PHÒNG
+    typeStats.forEach((type, index) => {
+      // Tên loại phòng
+      sheet.addRow([`Phòng ${type.TenLoaiPhong}`]).font = {
+        bold: true,
+        size: 14,
+      };
+      sheet.addRow([
+        "STT",
+        "Mã phòng",
+        "Tên phòng",
+        "Giá ngày CB",
+        "Giá giờ CB",
+        "Sức chứa",
+        "Số giường",
+      ]).font = { bold: true };
+
+      type.rooms.forEach((r) => {
+        sheet.addRow([
+          index + 1,
+          r.MaPhong,
+          r.TenPhong,
+          r.GiaNgayCB,
+          r.GiaGioCB,
+          r.SucChua,
+          r.SoGiuong,
+        ]);
+      });
+
+      // Dòng tóm tắt loại phòng
+      sheet.addRow([""]);
+      sheet.addRow([
+        "",
+        `Số phòng: ${type.soLuong}`,
+        `Giá TB ngày: ${Number(type.avgGiaNgay)}`,
+        `Giá TB giờ: ${Number(type.avgGiaGio)}`,
+      ]).font = { italic: true };
+
+      sheet.addRow([""]);
+    });
+
+    // THỐNG KÊ TOÀN HỆ THỐNG
+    sheet.addRow([""]);
+    sheet.addRow(["TỔNG QUAN TOÀN HỆ THỐNG"]).font = { size: 14, bold: true };
+    sheet.addRow([""]);
+    sheet.addRow([
+      `Tổng số phòng: ${systemStats.totalRooms}`,
+      `Giá TB ngày: ${Number(systemStats.avgGiaNgaySystem)}`,
+      `Giá TB giờ: ${Number(systemStats.avgGiaGioSystem)}`,
+      `Tổng giá trị ngày: ${Number(systemStats.totalGiaTriNgay)}`,
+    ]);
+
+    const now = new Date();
+    const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const _today = today.toISOString().slice(0, 19).replace("T", " ");
+
+    // Xuất file cho client
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=ThongKePhong-${_today}.xlsx`
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error("Export Excel error:", error);
+    res.status(500).send("Không thể xuất Excel");
+  }
+};
+
 module.exports = {
   create,
   detail,
@@ -160,4 +265,6 @@ module.exports = {
   index,
   store,
   search,
+  statistics,
+  exportExcel,
 };
