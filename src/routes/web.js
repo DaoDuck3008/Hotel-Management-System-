@@ -16,26 +16,25 @@ const initWebRoutes = (app) => {
     return res.send("Hello World!");
   });
 
-  router.get("/rooms", PhongController.index);
-  router.get("/rooms/statistics", PhongController.statistics);
-  router.get("/rooms/statistics/export", PhongController.exportExcel);
-  router.get("/rooms/search", PhongController.search);
-  router.get("/rooms/create", PhongController.create);
-  router.post("/rooms", upload.array("images", 20), PhongController.store);
-  router.get("/rooms/:maPhong", PhongController.detail);
-  router.delete("/rooms/:maPhong", PhongController.destroy);
-  router.get("/rooms/:maPhong/edit", PhongController.edit);
+  //  ===== Phong routes =====
+  router.get("/rooms", PhongController.index); // Lấy danh sách phòng
+  router.get("/rooms/statistics", PhongController.statistics); // Thống kê phòng
+  router.get("/rooms/statistics/export", PhongController.exportExcel); // Xuất thống kê phòng ra file Excel
+  router.get("/rooms/search", PhongController.search); // Tìm kiếm phòng
+  router.get("/rooms/create", PhongController.create); // Trang tạo phòng
+  router.post("/rooms", upload.array("images", 20), PhongController.store); // Lưu phòng mới
+  router.get("/rooms/:maPhong", PhongController.detail); // Chi tiết phòng
+  router.delete("/rooms/:maPhong", PhongController.destroy); // Xoá phòng
+  router.get("/rooms/:maPhong/edit", PhongController.edit); // Trang chỉnh sửa phòng
   router.put(
     "/rooms/:maPhong",
     upload.array("images", 20),
     PhongController.update
-  );
+  ); // Cập nhật phòng
 
-  // LeTan routes
-  router.get("/reception", LeTanController.index);
-
-  // Cập nhật trạng thái phòng
-  router.put("/reception/update-status/:maPhong", LeTanController.updateStatus);
+  // ==== LeTan routes =====
+  router.get("/reception", LeTanController.index); // Trang lễ tân
+  router.put("/reception/update-status/:maPhong", LeTanController.updateStatus); // Cập nhật trạng thái phòng từ lễ tân
 
   //BookRooms
   router.get("/bookings", DatPhongController.index);

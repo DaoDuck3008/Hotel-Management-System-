@@ -3,6 +3,7 @@ import db from "../models/index.js";
 import { createRoomSchema } from "../validators/PhongValidator.js";
 import ExcelJS from "exceljs";
 
+// Hiển thị danh sách phòng
 const index = async (req, res) => {
   const roomTypes = await db.LoaiPhong.findAll(); // lấy dữ liệu loại phòng
   const rooms = await PhongDao.getAll();
@@ -10,6 +11,7 @@ const index = async (req, res) => {
   return res.render("Phong/index.ejs", { roomTypes, rooms });
 };
 
+// Mở form tạo phòng mới
 const create = async (req, res) => {
   const roomTypes = await db.LoaiPhong.findAll();
   const amenities = await db.TienIch.findAll();
@@ -17,6 +19,7 @@ const create = async (req, res) => {
   return res.render("Phong/create.ejs", { roomTypes, amenities });
 };
 
+// Lưu phòng mới
 const store = async (req, res) => {
   try {
     // console.log(">>> req.body:", req.body);
@@ -45,6 +48,7 @@ const store = async (req, res) => {
   }
 };
 
+// Xem chi tiết phòng
 const detail = async (req, res) => {
   const { maPhong } = req.params;
 
@@ -57,6 +61,7 @@ const detail = async (req, res) => {
   res.render("Phong/detail.ejs", { room: room });
 };
 
+// Mở form chỉnh sửa phòng
 const edit = async (req, res) => {
   const { maPhong } = req.params;
 
@@ -75,6 +80,7 @@ const edit = async (req, res) => {
   return res.render("Phong/edit.ejs", { room, roomTypes, amenities });
 };
 
+// Chỉnh sửa phòng
 const update = async (req, res) => {
   try {
     // Kiểm tra phòng tồn tại trước
@@ -113,6 +119,7 @@ const update = async (req, res) => {
   }
 };
 
+// Xóa phòng
 const destroy = async (req, res) => {
   try {
     // console.log(">>> delete room: ", req.params);
@@ -145,6 +152,7 @@ const destroy = async (req, res) => {
   }
 };
 
+// Tìm kiếm
 const search = async (req, res) => {
   const rooms = await PhongDao.search(req.query);
   const roomTypes = await db.LoaiPhong.findAll();
@@ -152,6 +160,7 @@ const search = async (req, res) => {
   return res.render("Phong/index.ejs", { rooms, roomTypes });
 };
 
+// Thống kê
 const statistics = async (req, res) => {
   const { typeStats, systemStats } = await PhongDao.statistics();
 
@@ -161,6 +170,7 @@ const statistics = async (req, res) => {
   return res.render("Phong/statistics.ejs", { typeStats, systemStats });
 };
 
+// Xuất file excel
 const exportExcel = async (req, res) => {
   try {
     // 1. Lấy dữ liệu thống kê

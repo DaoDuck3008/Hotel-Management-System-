@@ -331,6 +331,7 @@ class PhongDAO {
     }
   }
 
+  // Tìm kiếm phòng
   static async search(searchData) {
     try {
       const wherePhong = {};
@@ -393,6 +394,7 @@ class PhongDAO {
     }
   }
 
+  // Thống kê phòng
   static async statistics() {
     try {
       const { fn, col } = db.sequelize;
