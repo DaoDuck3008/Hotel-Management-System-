@@ -1,5 +1,6 @@
 import db from "../models/index.js";
 import cloudinary from "../config/cloudinary.js";
+import { Op, where } from "sequelize";
 
 class PhongDAO {
   // Lấy tất cả phòng
@@ -326,6 +327,127 @@ class PhongDAO {
     } catch (error) {
       await transaction.rollback();
       console.error("Error updating room in PhongDAO:", error);
+      throw error;
+    }
+  }
+
+  static async search(searchData) {
+    try {
+      const wherePhong = {};
+      const include = [];
+
+      // 1. Tìm kiếm theo keyword
+      if (searchData.keyword) {
+        wherePhong[Op.or] = [
+          { TenPhong: { [Op.like]: `%${searchData.keyword}%` } },
+          { MaPhong: { [Op.like]: `%${searchData.keyword}%` } },
+        ];
+      }
+
+      // 2. Tìm theo sức chứa tối thiểu
+      if (searchData.sucChua) {
+        wherePhong.SucChua = { [Op.gte]: searchData.sucChua };
+      }
+
+      // 3. Tìm theo loại phòng
+      if (searchData.loaiPhong) {
+        wherePhong.TenLoaiPhong = searchData.loaiPhong;
+      }
+
+      // 4. Tìm theo giá
+      if (searchData.giaTu || searchData.giaDen) {
+        include.push({
+          model: db.GiaPhongTuan,
+          as: "GiaPhongTuan",
+          required: true,
+          where: {
+            GiaNgay: {
+              [Op.between]: [
+                parseInt(searchData.giaTu) || 0,
+                parseInt(searchData.giaDen) || Number.MAX_SAFE_INTEGER,
+              ],
+            },
+          },
+        });
+      }
+
+      // 5. Bao gồm các bảng khác
+      include.push(
+        { model: db.HinhAnh, as: "HinhAnh" },
+        { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
+        { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
+        { model: db.LoaiPhong, as: "LoaiPhong" },
+        { model: db.GiaPhongTuan, as: "GiaPhongTuan" }
+      );
+
+      // 6. Query chính
+      const rooms = await db.Phong.findAll({
+        where: wherePhong,
+        include,
+      });
+
+      return rooms;
+    } catch (error) {
+      console.error("Error searching rooms in PhongDAO:", error);
+      throw error;
+    }
+  }
+
+  static async statistics() {
+    try {
+      const { fn, col } = db.sequelize;
+
+      // 1) SQL xử lý thống kê theo loại phòng
+      const typeStats = await db.Phong.findAll({
+        attributes: [
+          "TenLoaiPhong",
+          [fn("COUNT", col("MaPhong")), "soLuong"],
+          [fn("AVG", col("GiaNgayCB")), "avgGiaNgay"],
+          [fn("AVG", col("GiaGioCB")), "avgGiaGio"],
+        ],
+        group: ["TenLoaiPhong"],
+        raw: true,
+      });
+
+      // 2) Lấy toàn bộ danh sách phòng
+      const rooms = await db.Phong.findAll({
+        attributes: [
+          "MaPhong",
+          "TenPhong",
+          "TenLoaiPhong",
+          "GiaNgayCB",
+          "GiaGioCB",
+          "SucChua",
+          "SoGiuong",
+        ],
+        raw: true,
+      });
+
+      // 3) Gộp phòng vào từng loại trong typeStats
+      const typeStatsWithRooms = typeStats.map((type) => {
+        return {
+          ...type,
+          rooms: rooms.filter((r) => r.TenLoaiPhong === type.TenLoaiPhong),
+        };
+      });
+
+      // 4) Thống kê toàn hệ thống
+      const systemStats = await db.Phong.findOne({
+        attributes: [
+          [fn("COUNT", col("MaPhong")), "totalRooms"],
+          [fn("AVG", col("GiaNgayCB")), "avgGiaNgaySystem"],
+          [fn("AVG", col("GiaGioCB")), "avgGiaGioSystem"],
+          [fn("SUM", col("GiaNgayCB")), "totalGiaTriNgay"],
+        ],
+        raw: true,
+      });
+
+      return {
+        typeStats: typeStatsWithRooms,
+        systemStats,
+      };
+    } catch (error) {
+      console.error("Error in PhongDAO.statistics:", error);
       throw error;
     }
   }
