@@ -1,4 +1,5 @@
 import db from "../models/index.js";
+import { Op } from "sequelize";
 
 class DatPhongDAO {
   // Lấy tất cả phòng với trạng thái hiện tại
@@ -203,49 +204,90 @@ class DatPhongDAO {
   static async createBooking(bookingData) {
     const t = await db.sequelize.transaction();
     try {
-      // 1. Tạo đơn
-      const booking = await db.DatPhong.create(
+      const {
+        HoVaTen,
+        GioiTinh,
+        NgaySinh,
+        SDT,
+        Email,
+        NgayNhanPhong,
+        NgayTraPhong,
+        rooms,
+      } = bookingData;
+
+      const roomsArray = JSON.parse(rooms);
+
+      // 1. Tạo khách hàng mới
+      const lastCustomer = await db.KhachHang.findOne({
+        order: [["MaKhachHang", "DESC"]],
+        transaction: t,
+      });
+
+      if (!lastCustomer) {
+        throw new Error("Không tìm thấy mã khách hàng cuối cùng");
+      }
+
+      // Lấy số cuối của mã khách hàng cuối cùng
+      const lastMaKhachHang =
+        parseInt(lastCustomer?.MaKhachHang?.slice(2)) || 0;
+      // tạo mã khách hàng mới
+      const newMaKhachHang = `KH${(lastMaKhachHang + 1)
+        .toString()
+        .padStart(3, "0")}`;
+
+      const newCustomer = await db.KhachHang.create(
         {
-          MaKhachHang: bookingData.MaKhachHang,
-          NgayDat: bookingData.NgayDat,
-          NgayNhanPhong: bookingData.NgayNhanPhong,
-          NgayTraPhong: bookingData.NgayTraPhong,
+          MaKhachHang: newMaKhachHang,
+          HoVaTen,
+          GioiTinh,
+          NgaySinh: NgaySinh || null,
+          SDT,
+          Email,
         },
         { transaction: t }
       );
 
-      // 2. Tạo chi tiết đặt phòng
-      if (bookingData.ChiTiet && bookingData.ChiTiet.length > 0) {
-        for (const detail of bookingData.ChiTiet) {
-          const chiTiet = await db.ChiTietDatPhong.create(
+      // 2. Tạo đơn đặt phòng
+      const now = new Date();
+      const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+      const newBooking = await db.DatPhong.create(
+        {
+          MaKhachHang: newCustomer.MaKhachHang,
+          NgayDat: today,
+          NgayNhanPhong,
+          NgayTraPhong,
+        },
+        { transaction: t }
+      );
+
+      // 3. Tạo chi tiết đặt phòng
+      for (const room of roomsArray) {
+        const datPhongCT = await db.ChiTietDatPhong.create(
+          {
+            MaDatPhong: newBooking.MaDatPhong,
+            MaPhong: room.MaPhong,
+          },
+          { transaction: t }
+        );
+
+        // 4. Tạo chi tiết giá đặt phòng
+        for (const priceDetail of room.GiaTheoNgay) {
+          await db.ChiTietGiaDatPhong.create(
             {
-              MaDatPhong: booking.MaDatPhong,
-              MaPhong: detail.MaPhong,
-              GiaNgay: detail.GiaNgay || 0,
-              GiaGio: detail.GiaGio || 0,
+              MaCTDatPhong: datPhongCT.MaCTDatPhong,
+              Ngay: priceDetail.Ngay,
+              GiaNgay: priceDetail.GiaNgay,
+              GiaGio: priceDetail.GiaGio,
+              LoaiGia: room.LoaiGia,
             },
             { transaction: t }
           );
-
-          // 3. Nếu có chi tiết giá theo ngày/ lễ
-          if (detail.ChiTietGia && detail.ChiTietGia.length > 0) {
-            for (const gia of detail.ChiTietGia) {
-              await db.ChiTietGiaDatPhong.create(
-                {
-                  MaChiTietDatPhong: chiTiet.MaChiTietDatPhong,
-                  Ngay: gia.Ngay,
-                  GiaNgay: gia.GiaNgay || 0,
-                  GiaGio: gia.GiaGio || 0,
-                },
-                { transaction: t }
-              );
-            }
-          }
         }
       }
 
       await t.commit();
-      return { success: true, booking };
+
+      return { success: true, maDatPhong: newBooking.MaDatPhong };
     } catch (error) {
       await t.rollback();
       console.error("Error creating booking:", error);
@@ -253,61 +295,47 @@ class DatPhongDAO {
     }
   }
 
-  // Tạo khách hàng mới
-  static async createCustomer(customerData) {
-    try {
-      // Lấy mã KH cao nhất hiện tại
-      const lastCustomer = await db.KhachHang.findOne({
-        order: [["MaKhachHang", "DESC"]],
-      });
+  static async getAvailableRooms(ngayNhanPhong, ngayTraPhong) {
+    const startDatetime = `${ngayNhanPhong} 00:00:00`;
+    const endDatetime = `${ngayTraPhong} 23:59:59`;
 
-      let newMaKhachHang = "KH001"; // Mặc định nếu chưa có khách hàng nào
-      if (lastCustomer) {
-        const lastNumber = parseInt(lastCustomer.MaKhachHang.slice(2)); // Lấy phần số
-        const nextNumber = lastNumber + 1;
-        newMaKhachHang = "KH" + nextNumber.toString().padStart(3, "0"); // Ví dụ KH004
-      }
-
-      const newCustomer = await db.KhachHang.create({
-        MaKhachHang: newMaKhachHang,
-        HoVaTen: customerData.HoVaTen,
-        SDT: customerData.SDT,
-        Email: customerData.Email,
-        GioiTinh: customerData.GioiTinh || null,
-        NgaySinh: customerData.NgaySinh || null,
-      });
-
-      return { success: true, customer: newCustomer };
-    } catch (error) {
-      console.error("Error creating customer:", error);
-      return { success: false, message: error.message };
-    }
-  }
-
-  static async getAvailableRooms() {
-    try {
-      const rooms = await db.Phong.findAll({
-        include: [
-          { model: db.LoaiPhong, as: "LoaiPhong" },
-          {
-            model: db.TrangThaiPhong,
-            as: "TrangThaiPhong",
-            separate: true,
-            order: [["ThoiGianCapNhat", "DESC"]],
-            limit: 1,
-            where: { TrangThai: "Empty" },
+    // Danh sách phòng bận
+    const phongBan = await db.ChiTietDatPhong.findAll({
+      attributes: [
+        [db.sequelize.fn("DISTINCT", db.sequelize.col("MaPhong")), "MaPhong"],
+      ],
+      include: [
+        {
+          model: db.DatPhong,
+          as: "DatPhong",
+          required: true,
+          where: {
+            NgayNhanPhong: { [Op.lte]: endDatetime },
+            NgayTraPhong: { [Op.gte]: startDatetime },
           },
-          { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
-          { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
-        ],
-        order: [["MaPhong", "ASC"]],
-      });
-      return rooms;
-    } catch (error) {
-      console.error("Error fetching available rooms:", error);
-      throw error;
-    }
+        },
+      ],
+      raw: true,
+    });
+
+    const maPhongBan = phongBan.map((p) => p.MaPhong);
+
+    // Lấy tất cả phòng KHÔNG nằm trong danh sách bận
+    const rooms = await db.Phong.findAll({
+      where: {
+        MaPhong: { [Op.notIn]: maPhongBan },
+      },
+      include: [
+        { model: db.LoaiPhong, as: "LoaiPhong" },
+        { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
+        { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
+      ],
+      order: [["MaPhong", "ASC"]],
+    });
+
+    return rooms;
   }
+
   static async getNewCustomers() {
     try {
       const customers = await db.KhachHang.findAll({
@@ -328,6 +356,7 @@ class DatPhongDAO {
       throw error;
     }
   }
+
   static async getAllCustomers() {
     try {
       return await db.KhachHang.findAll({
@@ -338,6 +367,7 @@ class DatPhongDAO {
       throw error;
     }
   }
+
   static async deleteBooking(maDatPhong) {
     try {
       const result = await db.DatPhong.destroy({
@@ -443,4 +473,5 @@ class DatPhongDAO {
     }
   }
 }
+
 module.exports = DatPhongDAO;

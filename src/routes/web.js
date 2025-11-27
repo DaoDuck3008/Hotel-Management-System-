@@ -53,6 +53,8 @@ const initWebRoutes = (app) => {
   router.get("/bookings/:maDatPhong/edit", DatPhongController.editForm); // GET form
   router.post("/bookings/:maDatPhong/edit", DatPhongController.edit); // POST form
   router.post("/bookings/:maDatPhong/delete", DatPhongController.destroy);
+  router.get("/api/rooms/available", DatPhongController.getAvailableRooms); // API lấy phòng trống theo khoảng ngày
+  router.get("/api/rooms/price-range", DatPhongController.getPriceRange); // API lấy giá phòng được chọn theo khoảng ngày
 
   return app.use("/", router);
 };

@@ -453,6 +453,69 @@ class PhongDAO {
       throw error;
     }
   }
+
+  static async getPriceRange(maPhong, ngayNhan, ngayTra) {
+    try {
+      // Chuyển input thành ngày VN
+      let start = getVietnamDate(ngayNhan);
+      let end = getVietnamDate(ngayTra);
+
+      // Fix giờ về 00:00:00 để tránh lệch ngày
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      // Lấy phòng cùng các bảng giá liên quan
+      const phong = await db.Phong.findOne({
+        where: { MaPhong: maPhong },
+        include: [
+          { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
+          { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
+        ],
+      });
+
+      // nếu không có phòng thì trả về mảng rỗng
+      if (!phong) {
+        console.log(">>> Không tìm thấy phòng trong PhongDAO.getPriceRange");
+        return [];
+      }
+
+      let prices = [];
+      let current = new Date(start);
+
+      while (current <= end) {
+        const yyyy = current.getFullYear();
+        const mm = String(current.getMonth() + 1).padStart(2, "0");
+        const dd = String(current.getDate()).padStart(2, "0");
+        const dateStr = `${yyyy}-${mm}-${dd}`; // format chuẩn YYYY-MM-DD
+
+        // Hàm lấy giá theo ngày bạn đã có trong model
+        const giaNgay = phong.getGiaNgayToday();
+        const giaGio = phong.getGiaGioToday();
+
+        prices.push({
+          date: dateStr,
+          giaNgay,
+          giaGio,
+        });
+
+        // Chuyển sang ngày tiếp theo
+        current.setDate(current.getDate() + 1);
+      }
+
+      return prices;
+    } catch (error) {
+      console.error("Error in PhongDAO.getPriceRange:", error);
+      throw error;
+    }
+  }
+}
+
+function getVietnamDate(dateInput = new Date()) {
+  return new Date(
+    new Date(dateInput).toLocaleString("en-US", {
+      timeZone: "Asia/Ho_Chi_Minh",
+    })
+  );
 }
 
 module.exports = PhongDAO;

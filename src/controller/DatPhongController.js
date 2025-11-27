@@ -1,4 +1,5 @@
 import DatPhongDAO from "../DAO/DatPhongDAO.js";
+import PhongDAO from "../DAO/PhongDAO.js";
 
 // Hiển thị danh sách đặt phòng
 const index = async (req, res) => {
@@ -27,10 +28,7 @@ const detail = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const rooms = await DatPhongDAO.getAvailableRooms(); // Lấy phòng trống
-    const customers = await DatPhongDAO.getAllCustomers();
-    const customer = customers[0] || null;
-    return res.render("DatPhong/create.ejs", { rooms, customers, customer });
+    return res.render("DatPhong/create.ejs");
   } catch (error) {
     console.log(error);
     req.flash("error", "Không thể hiển thị form tạo mới");
@@ -51,55 +49,19 @@ const newCustomer = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const {
-      HoVaTen,
-      GioiTinh,
-      NgaySinh,
-      SDT,
-      Email,
-      NgayDat,
-      NgayNhanPhong,
-      NgayTraPhong,
-      ChiTiet,
-    } = req.body;
+    // console.log(">>> req.body:", req.body);
+    const result = await DatPhongDAO.createBooking(req.body);
 
-    // 1. Tạo khách hàng mới
-    const customerResult = await DatPhongDAO.createCustomer({
-      HoVaTen,
-      GioiTinh,
-      NgaySinh,
-      SDT,
-      Email,
-    });
-
-    if (!customerResult.success || !customerResult.customer) {
-      req.flash("error", customerResult.message || "Lỗi tạo khách hàng mới");
+    if (!result.success) {
+      req.flash("error", result.message);
       return res.redirect("/bookings/create");
     }
 
-    const MaKhachHang = customerResult.customer.MaKhachHang;
-
-    // 2. Tạo đơn đặt phòng
-    const bookingData = {
-      MaKhachHang,
-      NgayDat,
-      NgayNhanPhong,
-      NgayTraPhong,
-      ChiTiet,
-    };
-
-    const bookingResult = await DatPhongDAO.createBooking(bookingData);
-
-    if (bookingResult.success) {
-      req.flash("success", "Tạo đơn đặt phòng thành công");
-      return res.redirect("/bookings");
-    } else {
-      req.flash("error", bookingResult.message);
-      return res.redirect("/bookings/create");
-    }
+    req.flash("success", "Tạo đơn đặt phòng thành công");
+    return res.redirect("/bookings");
   } catch (error) {
-    console.error("Error in createPost:", error);
-    req.flash("error", "Lỗi tạo đơn đặt phòng");
+    console.error("Create booking error:", error);
+    req.flash("error", "Có lỗi khi tạo đơn đặt phòng");
     return res.redirect("/bookings/create");
   }
 };
@@ -189,6 +151,36 @@ export const destroy = async (req, res) => {
   }
 };
 
+const getPriceRange = async (req, res) => {
+  try {
+    const { MaPhong, from, to } = req.query;
+
+    const prices = await PhongDAO.getPriceRange(MaPhong, from, to);
+
+    return res.json({ prices });
+  } catch (error) {
+    console.error("Error in getPriceRange:", error);
+    return res.status(500).json({ error: "Server Error" });
+  }
+};
+
+const getAvailableRooms = async (req, res) => {
+  try {
+    const { from, to } = req.query;
+    console.log(">>> Fetching available rooms from", from, "to", to);
+
+    const availableRooms = await DatPhongDAO.getAvailableRooms(from, to);
+
+    return res.json({
+      success: true,
+      rooms: availableRooms,
+    });
+  } catch (error) {
+    console.error("Error in getAvailableRooms:", error);
+    return res.status(500).json({ error: "Server Error" });
+  }
+};
+
 export default {
   index,
   detail,
@@ -198,4 +190,6 @@ export default {
   editForm,
   edit,
   destroy,
+  getAvailableRooms,
+  getPriceRange,
 };

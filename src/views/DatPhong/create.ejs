@@ -65,6 +65,9 @@
             method="POST"
             class="shadow-card p-4 rounded"
           >
+            <!-- Hidden input chứa rooms[] -->
+            <input type="hidden" name="rooms" id="roomsInput" />
+
             <!-- Thông tin khách hàng -->
             <div class="form-section mb-4">
               <h5 class="mb-3">
@@ -123,15 +126,6 @@
               </h5>
               <div class="row">
                 <div class="col-md-4 mb-2">
-                  <label class="fw-bold">Ngày đặt</label>
-                  <input
-                    type="date"
-                    name="NgayDat"
-                    class="form-control"
-                    required
-                  />
-                </div>
-                <div class="col-md-4 mb-2">
                   <label class="fw-bold">Ngày nhận</label>
                   <input
                     type="date"
@@ -157,54 +151,45 @@
               <h5 class="mb-3">
                 <i class="fas fa-door-open me-2"></i>Danh sách phòng
               </h5>
+
               <div id="roomDetails">
-                <div
-                  class="detail-item border rounded p-3 mb-3 bg-white shadow-sm"
-                >
+                <!-- BLOCK ĐẦU TIÊN -->
+                <div class="detail-item border rounded p-3 mb-3">
                   <div class="row">
+                    <!-- Mã phòng -->
                     <div class="col-md-3 mb-2">
-                      <label class="fw-bold">Chọn phòng</label>
+                      <label class="fw-bold">Mã phòng</label>
                       <select
-                        name="ChiTiet[0][MaPhong]"
                         class="form-select room-select"
+                        name="MaPhong[]"
                         required
                       >
-                        <% rooms.forEach(room => { %>
-                        <option
-                          value="<%= room.MaPhong %>"
-                          data-gia-ngay="<%= room.GiaNgay %>"
-                          data-gia-gio="<%= room.GiaGio %>"
-                        >
-                          <%= room.TenPhong %> - <%= room.LoaiPhong.TenLoai %>
-                        </option>
-                        <% }) %>
+                        <option value="">-- Chọn phòng trống --</option>
                       </select>
                     </div>
+
+                    <!-- Loại giá -->
                     <div class="col-md-2 mb-2">
-                      <label class="fw-bold">Giá ngày</label>
-                      <input
-                        type="number"
-                        name="ChiTiet[0][GiaNgay]"
-                        class="form-control room-price-day"
-                        readonly
-                      />
+                      <label class="fw-bold">Loại giá</label>
+                      <select class="form-select" name="LoaiGia[]" required>
+                        <option value="Giá Ngày">Giá ngày</option>
+                        <option value="Giá Giờ">Giá giờ</option>
+                      </select>
                     </div>
-                    <div class="col-md-2 mb-2">
-                      <label class="fw-bold">Giá giờ</label>
-                      <input
-                        type="number"
-                        name="ChiTiet[0][GiaGio]"
-                        class="form-control room-price-hour"
-                        readonly
-                      />
-                    </div>
-                    <div class="col-md-1 text-end">
-                      <button
-                        type="button"
-                        class="btn btn-danger btn-sm removeDetailBtn"
-                      >
-                        <i class="fas fa-trash"></i> Xóa
-                      </button>
+
+                    <!-- Giá từng ngày -->
+                    <div class="col-md-7 mb-2">
+                      <label class="fw-bold">Giá theo từng ngày</label>
+                      <div
+                        class="price-detail-list border rounded p-2"
+                        style="
+                          background: #f0f0f0;
+                          max-height: 200px;
+                          overflow: auto;
+                        "
+                      ></div>
+
+                      <input type="hidden" class="gia-theo-ngay-hidden" />
                     </div>
                   </div>
                 </div>
@@ -229,73 +214,178 @@
       </div>
     </div>
 
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-      let index = 1;
-
-      // Cập nhật giá theo phòng chọn
-      function updatePriceFromSelect(select) {
-        const block = select.closest(".detail-item");
-        const option = select.selectedOptions[0];
-        const giaNgay = parseFloat(option.dataset.giaNgay) || 0;
-        const giaGio = parseFloat(option.dataset.giaGio) || 0;
-
-        block.querySelector(".room-price-day").value = giaNgay;
-        block.querySelector(".room-price-hour").value = giaGio;
+      function normalizeDateInput(dateStr) {
+        if (!dateStr) return null;
+        if (dateStr.includes("/")) {
+          const [dd, mm, yyyy] = dateStr.split("/");
+          return `${yyyy}-${mm}-${dd}`;
+        }
+        return dateStr;
       }
 
-      // Áp dụng cho block mặc định
-      document.querySelectorAll(".room-select").forEach(select => {
-        updatePriceFromSelect(select);
-        select.addEventListener("change", () => updatePriceFromSelect(select));
+      function getSafeDateInput(selector) {
+        return normalizeDateInput(document.querySelector(selector).value);
+      }
+
+      async function loadAvailableRooms(selectElement) {
+        const from = getSafeDateInput("input[name='NgayNhanPhong']");
+        const to = getSafeDateInput("input[name='NgayTraPhong']");
+
+        if (!from || !to) return;
+
+        const res = await fetch(`/api/rooms/available?from=${from}&to=${to}`);
+        const data = await res.json();
+
+        selectElement.innerHTML =
+          '<option value="">-- Chọn phòng trống --</option>';
+
+        if (!data.rooms || data.rooms.length === 0) {
+          selectElement.innerHTML += `<option disabled>Không có phòng trống</option>`;
+          return;
+        }
+
+        data.rooms.forEach((room) => {
+          selectElement.innerHTML += `
+            <option value="${room.MaPhong}">${room.MaPhong} - ${room.TenPhong}</option>
+          `;
+        });
+      }
+
+      async function updatePriceRange(selectElement) {
+        const block = selectElement.closest(".detail-item");
+        const MaPhong = selectElement.value;
+
+        const from = getSafeDateInput("input[name='NgayNhanPhong']");
+        const to = getSafeDateInput("input[name='NgayTraPhong']");
+
+        if (!MaPhong || !from || !to) return;
+
+        const res = await fetch(
+          `/api/rooms/price-range?MaPhong=${MaPhong}&from=${from}&to=${to}`
+        );
+        const data = await res.json();
+
+        const list = block.querySelector(".price-detail-list");
+        const inputGiaTheoNgay = block.querySelector(".gia-theo-ngay-hidden");
+
+        list.innerHTML = "";
+
+        let giaTheoNgay = [];
+
+        data.prices.forEach((item) => {
+          list.innerHTML += `
+    <div class="d-flex justify-content-between border-bottom py-1">
+      <span>${item.date}</span>
+      <strong>Ngày: ${item.giaNgay.toLocaleString()} | Giờ: ${item.giaGio.toLocaleString()}</strong>
+    </div>
+  `;
+
+          giaTheoNgay.push({
+            Ngay: item.date,
+            GiaNgay: item.giaNgay,
+            GiaGio: item.giaGio,
+          });
+        });
+
+        inputGiaTheoNgay.value = JSON.stringify(giaTheoNgay);
+      }
+
+      ["NgayNhanPhong", "NgayTraPhong"].forEach((name) => {
+        document
+          .querySelector(`input[name='${name}']`)
+          .addEventListener("change", () => {
+            document.querySelectorAll(".room-select").forEach((select) => {
+              loadAvailableRooms(select);
+            });
+          });
       });
 
-      // Thêm phòng mới
+      document.addEventListener("change", (e) => {
+        if (e.target.classList.contains("room-select")) {
+          updatePriceRange(e.target);
+        }
+      });
+
+      // ========== ADD ROOM BLOCK ==========
       document.getElementById("addRoomBtn").addEventListener("click", () => {
-        const block = document.createElement("div");
-        block.className = "detail-item border rounded p-3 mb-3 bg-white shadow-sm";
+        const container = document.getElementById("roomDetails");
 
-        let options = '';
-        <% rooms.forEach(room => { %>
-          options += `<option value="<%= room.MaPhong %>" data-gia-ngay="<%= room.GiaNgay %>" data-gia-gio="<%= room.GiaGio %>"><%= room.TenPhong %> - <%= room.LoaiPhong.TenLoai %></option>`;
-        <% }) %>
+        const newBlock = document.createElement("div");
+        newBlock.classList.add(
+          "detail-item",
+          "border",
+          "rounded",
+          "p-3",
+          "mb-3"
+        );
 
-        block.innerHTML = `
+        newBlock.innerHTML = `
           <div class="row">
             <div class="col-md-3 mb-2">
-              <label class="fw-bold">Chọn phòng</label>
-              <select name="ChiTiet[${index}][MaPhong]" class="form-select room-select" required>
-                ${options}
+              <label class="fw-bold">Mã phòng</label>
+              <select class="form-select room-select" name="MaPhong[]" required>
+                <option value="">-- Chọn phòng trống --</option>
               </select>
             </div>
+
             <div class="col-md-2 mb-2">
-              <label class="fw-bold">Giá ngày</label>
-              <input type="number" name="ChiTiet[${index}][GiaNgay]" class="form-control room-price-day" readonly>
+              <label class="fw-bold">Loại giá</label>
+              <select class="form-select" name="LoaiGia[]" required>
+                <option value="Giá Ngày">Giá ngày</option>
+                <option value="Giờ">Giá giờ</option>
+              </select>
             </div>
-            <div class="col-md-2 mb-2">
-              <label class="fw-bold">Giá giờ</label>
-              <input type="number" name="ChiTiet[${index}][GiaGio]" class="form-control room-price-hour" readonly>
+
+            <div class="col-md-6 mb-2">
+              <label class="fw-bold">Giá theo từng ngày</label>
+              <div class="price-detail-list border rounded p-2"
+                   style="background:#f0f0f0;max-height:200px;overflow:auto;">
+              </div>
+
+              <input type="hidden" class="gia-theo-ngay-hidden">
             </div>
-            <div class="col-md-1 text-end">
-              <button type="button" class="btn btn-danger btn-sm removeDetailBtn"><i class="fas fa-trash"></i> Xóa</button>
+
+            <div class="col-md-1 d-flex align-items-start">
+              <button type="button" class="btn btn-danger btn-sm remove-room-btn">Xóa</button>
             </div>
           </div>
         `;
-        document.getElementById("roomDetails").appendChild(block);
 
-        const newSelect = block.querySelector(".room-select");
-        updatePriceFromSelect(newSelect);
-        newSelect.addEventListener("change", () => updatePriceFromSelect(newSelect));
+        container.appendChild(newBlock);
 
-        index++;
+        loadAvailableRooms(newBlock.querySelector(".room-select"));
+
+        newBlock
+          .querySelector(".remove-room-btn")
+          .addEventListener("click", () => newBlock.remove());
       });
 
-      // Xóa phòng (chỉ DOM)
-      document.addEventListener("click", (e) => {
-        const btn = e.target.closest(".removeDetailBtn");
-        if (btn) {
-          btn.closest(".detail-item").remove();
-        }
+      // ========== TRƯỚC KHI SUBMIT → GHÉP ROOMS[] ==========
+      document.querySelector("form").addEventListener("submit", function () {
+        const roomBlocks = document.querySelectorAll(".detail-item");
+
+        const rooms = [];
+
+        roomBlocks.forEach((block) => {
+          const MaPhong = block.querySelector("select[name='MaPhong[]']").value;
+          const LoaiGia = block.querySelector("select[name='LoaiGia[]']").value;
+
+          const giaTheoNgay = JSON.parse(
+            block.querySelector(".gia-theo-ngay-hidden").value
+          );
+
+          rooms.push({
+            MaPhong,
+            LoaiGia,
+            GiaTheoNgay: giaTheoNgay,
+          });
+        });
+
+        document.getElementById("roomsInput").value = JSON.stringify(rooms);
       });
     </script>
   </body>
