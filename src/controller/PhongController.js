@@ -151,6 +151,15 @@ const search = async (req, res) => {
   return res.render("Phong/index.ejs", { rooms, roomTypes });
 };
 
+const statistics = async (req, res) => {
+  const { typeStats, systemStats } = await PhongDao.statistics();
+
+  console.log(">>> typeStats:", typeStats);
+  console.log(">>> systemStats:", systemStats);
+
+  return res.render("Phong/statistics.ejs", { typeStats, systemStats });
+};
+
 module.exports = {
   create,
   detail,
@@ -160,4 +169,5 @@ module.exports = {
   index,
   store,
   search,
+  statistics,
 };

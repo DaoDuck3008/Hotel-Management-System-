@@ -17,6 +17,7 @@ const initWebRoutes = (app) => {
   });
 
   router.get("/rooms", PhongController.index);
+  router.get("/rooms/statistics", PhongController.statistics);
   router.get("/rooms/search", PhongController.search);
   router.get("/rooms/create", PhongController.create);
   router.post("/rooms", upload.array("images", 20), PhongController.store);

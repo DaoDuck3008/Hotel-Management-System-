@@ -115,23 +115,56 @@
 
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link text-white active" data-menu="rooms">
-                  <i class="fas fa-bed me-2"></i>
-                  <span>Bộ phận Phòng</span>
+                <a
+                  class="nav-link text-white d-flex justify-content-between align-items-center"
+                  data-bs-toggle="collapse"
+                  href="#roomSubmenu"
+                  role="button"
+                  aria-expanded="false"
+                  aria-controls="roomSubmenu"
+                >
+                  <span> <i class="fas fa-bed me-2"></i> Bộ phận Phòng </span>
+
+                  <i class="fas fa-chevron-down small"></i>
                 </a>
+
+                <div class="collapse ps-4" id="roomSubmenu">
+                  <ul class="nav flex-column">
+                    <li class="nav-item">
+                      <a class="nav-link text-white" href="/rooms/statistics">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Thống kê phòng
+                      </a>
+                    </li>
+
+                    <li class="nav-item">
+                      <a
+                        class="nav-link text-white"
+                        href="/rooms/price-settings"
+                      >
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        Điều chỉnh giá
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </li>
+
+              <!-- Other menu items -->
               <li class="nav-item">
                 <a class="nav-link text-white" data-menu="business">
                   <i class="fas fa-briefcase me-2"></i>
                   <span>Bộ phận Kinh doanh</span>
                 </a>
               </li>
+
               <li class="nav-item">
                 <a class="nav-link text-white" data-menu="hr">
                   <i class="fas fa-users me-2"></i>
                   <span>Bộ phận Nhân sự</span>
                 </a>
               </li>
+
               <li class="nav-item">
                 <a class="nav-link text-white" data-menu="reception">
                   <i class="fas fa-user-circle me-2"></i>

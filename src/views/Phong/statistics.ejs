@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thống kê theo Loại Phòng - Hệ thống Khách sạn</title>
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f3f4f6;
+        color: #1f2937;
+      }
+
+      .header,
+      .stat-card,
+      .summary-section {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .room-count {
+        background: #2563eb;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .price-stats {
+        background: #f0f9ff;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+      }
+
+      .price-label {
+        color: #6b7280;
+      }
+
+      .price-value {
+        font-weight: 600;
+        color: #2563eb;
+      }
+
+      .room-list {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 15px;
+      }
+
+      .room-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+
+      .room-item:last-child {
+        border-bottom: none;
+      }
+
+      .room-name {
+        font-weight: 500;
+        color: #1f2937;
+      }
+
+      .price-day {
+        color: #2563eb;
+        font-weight: 600;
+      }
+
+      .price-hour {
+        color: #059669;
+        font-size: 14px;
+      }
+
+      .summary-item {
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .summary-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2563eb;
+        margin-bottom: 5px;
+      }
+
+      .summary-label {
+        color: #6b7280;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-4">
+      <!-- Header -->
+      <header class="header bg-white p-4 rounded mb-4">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+        >
+          <div class="header-text mb-3 mb-md-0">
+            <h1 class="h3 mb-2">Thống kê theo Loại Phòng</h1>
+            <p class="text-muted mb-0">
+              Tổng quan về số lượng và giá cả các loại phòng
+            </p>
+          </div>
+          <button class="btn btn-success" onclick="exportToExcel()">
+            <i class="fas fa-file-excel me-2"></i>
+            Xuất Excel
+          </button>
+        </div>
+      </header>
+
+      <!-- Stats Grid -->
+      <div class="row g-4 mb-4 d-flex justify-content-center">
+        <% if(typeStats && typeStats.length > 0){
+        typeStats.forEach(function(typeStat){ %>
+        <div class="col-lg-4 col-md-6">
+          <div class="stat-card bg-white p-3 rounded h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h5 mb-0">Phòng <%= typeStat.TenLoaiPhong %></h3>
+              <span class="room-count"> <%= typeStat.soLuong %> phòng</span>
+            </div>
+
+            <div class="price-stats">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="price-label">Giá TB theo ngày CB:</span>
+                <span class="price-value">
+                  <%= Number(typeStat.avgGiaNgay).toLocaleString() %> VNĐ</span
+                >
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="price-label">Giá TB theo giờ CB:</span>
+                <span class="price-value"
+                  ><%= Number(typeStat.avgGiaGio).toLocaleString() %> VNĐ</span
+                >
+              </div>
+            </div>
+
+            <div class="room-list">
+              <% if(typeStat.rooms && typeStat.rooms.length > 0){
+              typeStat.rooms.forEach(room => { %>
+              <div class="room-item row">
+                <span class="room-name col-8"
+                  ><%= room.MaPhong %> - <%= room.TenPhong %></span
+                >
+                <div class="text-end col-4">
+                  <div class="price-day">
+                    <%= room.GiaNgayCB.toLocaleString() %> VNĐ
+                  </div>
+                  <div class="price-hour">
+                    <%= room.GiaGioCB.toLocaleString() %> VNĐ/giờ
+                  </div>
+                </div>
+              </div>
+              <% })} %>
+            </div>
+          </div>
+        </div>
+        <% }); } %>
+      </div>
+
+      <!-- Summary Section -->
+      <div class="summary-section bg-white p-4 rounded mb-4">
+        <h3 class="h4 mb-4">Tổng quan toàn hệ thống</h3>
+        <div class="row g-3">
+          <div class="col-md-3 col-6">
+            <div class="summary-item">
+              <div class="summary-value"><%= systemStats.totalRooms %></div>
+              <div class="summary-label">Tổng số phòng</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="summary-item">
+              <div class="summary-value">
+                <%= Number(systemStats.avgGiaNgaySystem).toLocaleString() %> VNĐ
+              </div>
+              <div class="summary-label">Giá TB theo ngày</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="summary-item">
+              <div class="summary-value">
+                <%= Number(systemStats.avgGiaGioSystem).toLocaleString() %> VNĐ
+              </div>
+              <div class="summary-label">Giá TB theo giờ</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="summary-item">
+              <div class="summary-value">
+                <%= Number(systemStats.avgGiaGioSystem).toLocaleString() %> VNĐ
+              </div>
+              <div class="summary-label">Tổng giá trị/ngày</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back Button -->
+      <a href="/rooms" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>
+        Quay lại danh sách
+      </a>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      function exportToExcel() {
+        // Tạo thông báo xuất file
+        alert(
+          'Đang xuất file Excel...\n\nFile "Thong_ke_phong.xlsx" đã được tải xuống!'
+        );
+
+        // Trong thực tế, bạn sẽ tích hợp thư viện như SheetJS ở đây
+        // để thực sự xuất file Excel với dữ liệu thống kê
+      }
+    </script>
+  </body>
+</html>
