@@ -14,7 +14,6 @@ class KhachHang extends Model {
         NgaySinh: { type: DataTypes.DATEONLY, allowNull: true },
         SDT: { type: DataTypes.STRING(15), allowNull: true },
         Email: { type: DataTypes.STRING(100), allowNull: false },
-        Passsword: { type: DataTypes.STRING(255), allowNull: false },
       },
       { sequelize, tableName: "KhachHang", timestamps: false }
     );

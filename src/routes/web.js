@@ -37,8 +37,8 @@ const initWebRoutes = (app) => {
 
   //BookRooms
   router.get("/bookings", DatPhongController.index);
-  router.get("/bookings/:maDatPhong", DatPhongController.detail);
   router.get("/bookings/create", DatPhongController.create);
+  router.get("/bookings/:maDatPhong", DatPhongController.detail);
   return app.use("/", router);
 };
 
