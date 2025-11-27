@@ -3,7 +3,7 @@ import db from "../models/index.js";
 import { createRoomSchema } from "../validators/PhongValidator.js";
 
 const index = async (req, res) => {
-  const roomTypes = await db.LoaiPhong.findAll();
+  const roomTypes = await db.LoaiPhong.findAll(); // lấy dữ liệu loại phòng
   const rooms = await PhongDao.getAll();
 
   return res.render("Phong/index.ejs", { roomTypes, rooms });
@@ -144,6 +144,13 @@ const destroy = async (req, res) => {
   }
 };
 
+const search = async (req, res) => {
+  const rooms = await PhongDao.search(req.query);
+  const roomTypes = await db.LoaiPhong.findAll();
+
+  return res.render("Phong/index.ejs", { rooms, roomTypes });
+};
+
 module.exports = {
   create,
   detail,
@@ -152,4 +159,5 @@ module.exports = {
   destroy,
   index,
   store,
+  search,
 };

@@ -1,5 +1,6 @@
 import db from "../models/index.js";
 import cloudinary from "../config/cloudinary.js";
+import { Op, where } from "sequelize";
 
 class PhongDAO {
   // Lấy tất cả phòng
@@ -326,6 +327,68 @@ class PhongDAO {
     } catch (error) {
       await transaction.rollback();
       console.error("Error updating room in PhongDAO:", error);
+      throw error;
+    }
+  }
+
+  static async search(searchData) {
+    try {
+      const wherePhong = {};
+      const include = [];
+
+      // 1. Tìm kiếm theo keyword
+      if (searchData.keyword) {
+        wherePhong[Op.or] = [
+          { TenPhong: { [Op.like]: `%${searchData.keyword}%` } },
+          { MaPhong: { [Op.like]: `%${searchData.keyword}%` } },
+        ];
+      }
+
+      // 2. Tìm theo sức chứa tối thiểu
+      if (searchData.sucChua) {
+        wherePhong.SucChua = { [Op.gte]: searchData.sucChua };
+      }
+
+      // 3. Tìm theo loại phòng
+      if (searchData.loaiPhong) {
+        wherePhong.TenLoaiPhong = searchData.loaiPhong;
+      }
+
+      // 4. Tìm theo giá
+      if (searchData.giaTu || searchData.giaDen) {
+        include.push({
+          model: db.GiaPhongTuan,
+          as: "GiaPhongTuan",
+          required: true,
+          where: {
+            GiaNgay: {
+              [Op.between]: [
+                parseInt(searchData.giaTu) || 0,
+                parseInt(searchData.giaDen) || Number.MAX_SAFE_INTEGER,
+              ],
+            },
+          },
+        });
+      }
+
+      // 5. Bao gồm các bảng khác
+      include.push(
+        { model: db.HinhAnh, as: "HinhAnh" },
+        { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
+        { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
+        { model: db.LoaiPhong, as: "LoaiPhong" },
+        { model: db.GiaPhongTuan, as: "GiaPhongTuan" }
+      );
+
+      // 6. Query chính
+      const rooms = await db.Phong.findAll({
+        where: wherePhong,
+        include,
+      });
+
+      return rooms;
+    } catch (error) {
+      console.error("Error searching rooms in PhongDAO:", error);
       throw error;
     }
   }
