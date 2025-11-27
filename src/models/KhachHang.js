@@ -21,7 +21,10 @@ class KhachHang extends Model {
   }
 
   static associate(models) {
-    this.hasMany(models.DatPhong, { foreignKey: "MaKhachHang" });
+    this.hasMany(models.DatPhong, {
+      foreignKey: "MaKhachHang",
+      as: "DatPhong",
+    });
   }
 }
 

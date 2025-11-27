@@ -2,6 +2,7 @@ import express from "express";
 import PhongController from "../controller/PhongController.js";
 import LeTanController from "../controller/LeTanController.js";
 import upload from "../middlewares/upload.js";
+import DatPhongController from "../controller/DatPhongController.js";
 
 const router = express.Router();
 
@@ -33,6 +34,10 @@ const initWebRoutes = (app) => {
   // Cập nhật trạng thái phòng
   router.put("/reception/update-status/:maPhong", LeTanController.updateStatus);
 
+  //BookRooms
+  router.get("/bookings", DatPhongController.index);
+  router.get("/bookings/:maDatPhong", DatPhongController.detail);
+  router.get("/bookings/create", DatPhongController.create);
   return app.use("/", router);
 };
 

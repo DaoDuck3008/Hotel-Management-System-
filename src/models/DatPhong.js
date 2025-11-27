@@ -20,8 +20,14 @@ class DatPhong extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.KhachHang, { foreignKey: "MaKhachHang" });
-    this.hasMany(models.ChiTietDatPhong, { foreignKey: "MaDatPhong" });
+    this.belongsTo(models.KhachHang, {
+      foreignKey: "MaKhachHang",
+      as: "KhachHang",
+    });
+    this.hasMany(models.ChiTietDatPhong, {
+      foreignKey: "MaDatPhong",
+      as: "ChiTiet",
+    });
   }
 }
 
