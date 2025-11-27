@@ -6,7 +6,22 @@ class DatPhongDAO {
     try {
       const rooms = await db.Phong.findAll({
         include: [
-          { model: db.LoaiPhong, as: "LoaiPhong" },
+          {
+            model: db.LoaiPhong,
+            as: "LoaiPhong",
+          },
+          {
+            model: db.HinhAnh,
+            as: "HinhAnh",
+          },
+          {
+            model: db.GiaPhongTuan,
+            as: "GiaPhongTuan",
+          },
+          {
+            model: db.GiaPhongNgayLe,
+            as: "GiaPhongNgayLe",
+          },
           {
             model: db.TrangThaiPhong,
             as: "TrangThaiPhong",
@@ -14,14 +29,13 @@ class DatPhongDAO {
             order: [["ThoiGianCapNhat", "DESC"]],
             limit: 1,
           },
-          { model: db.HinhAnh, as: "HinhAnh", limit: 1 },
         ],
         order: [["MaPhong", "ASC"]],
       });
 
       return rooms;
     } catch (error) {
-      console.error("Error fetching rooms with status:", error);
+      console.error("Error in getAllRoomsWithStatus:", error);
       throw error;
     }
   }

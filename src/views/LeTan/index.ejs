@@ -254,13 +254,9 @@
             <h1 class="h3 mb-0">Lễ tân</h1>
           </div>
           <div class="d-flex gap-3">
-            <a href="#" class="btn btn-outline-primary">
+            <a href="/receptions/payment" class="btn btn-outline-primary">
               <i class="fas fa-bed me-2"></i>
               Thanh toán phòng
-            </a>
-            <a href="#" class="btn btn-primary">
-              <i class="fas fa-calendar-check me-2"></i>
-              Xếp phòng cho khách
             </a>
           </div>
         </div>
@@ -382,22 +378,19 @@
                 <span><%= room.SucChua %> người</span>
               </div>
             </div>
-
-            <!-- Giá phòng -->
-            <div class="room-price">
-              <div class="price-item">
-                <span class="price-label">Giá theo ngày:</span>
-                <span class="price-value"><%= room.GiaNgayCB?.toLocaleString('vi-VN') || 'N/A' %> VNĐ</span>
-              </div>
-              <% if (room.GiaGioCB) { %>
-              <div class="price-item">
-                <span class="price-label">Giá theo giờ:</span>
-                <span class="price-value"><%= room.GiaGioCB.toLocaleString('vi-VN') %> VNĐ</span>
-              </div>
-              <% } %>
+          <!-- Giá phòng -->
+          <div class="room-price">
+            <div class="price-item">
+              <span class="price-label">Giá theo ngày:</span>
+              <span class="price-value"><%= room.getGiaNgayToday().toLocaleString('vi-VN') %> VNĐ</span>
             </div>
+            <div class="price-item">
+              <span class="price-label">Giá theo giờ:</span>
+              <span class="price-value"><%= room.getGiaGioToday().toLocaleString('vi-VN') %> VNĐ</span>
+            </div>
+          </div>
 
-            <!-- Nút cập nhật trạng thái -->
+            <!-- Cập nhật trạng thái -->
             <div class="status-buttons">
               <button
                 class="status-btn btn-empty"
@@ -436,7 +429,7 @@
         }
 
         try {
-          const response = await fetch(`/reception/update-status/${maPhong}`, {
+          const response = await fetch(`/receptions/update-status/${maPhong}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
