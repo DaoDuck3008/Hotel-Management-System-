@@ -20,7 +20,10 @@ class ChiTietDatPhong extends Model {
   static associate(models) {
     this.belongsTo(models.DatPhong, { foreignKey: "MaDatPhong" });
     this.belongsTo(models.Phong, { foreignKey: "MaPhong" });
-    this.hasMany(models.ChiTietGiaDatPhong, { foreignKey: "MaCTDatPhong" });
+    this.hasMany(models.ChiTietGiaDatPhong, {
+      foreignKey: "MaCTDatPhong",
+      as: "ChiTietGiaDatPhong",
+    });
   }
 }
 
