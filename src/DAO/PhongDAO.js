@@ -6,6 +6,7 @@ class PhongDAO {
   // Lấy tất cả phòng
   static async getAll() {
     try {
+      // Lấy tất cả phòng cùng các bảng liên quan
       const rooms = await db.Phong.findAll({
         include: [
           { model: db.LoaiPhong, as: "LoaiPhong" },
@@ -26,9 +27,6 @@ class PhongDAO {
   static async create(data, files) {
     const transaction = await db.sequelize.transaction();
     try {
-      // console.log(">>> PhongDAO.create data:", data);
-      // console.log(">>> PhongDAO.create files:", files);
-
       // lưu phòng mới
       const newRoom = await db.Phong.create(
         {
@@ -52,7 +50,7 @@ class PhongDAO {
       await db.TrangThaiPhong.create(
         {
           MaPhong: data.maPhong,
-          ThoiGianCapNhat: vietnamTime,
+          ThoiGianCapNhat: vietnamTime, // thời gian cập nhật theo giờ VN
           TrangThai: "Empty",
         },
         { transaction }
@@ -75,8 +73,10 @@ class PhongDAO {
       // lưu giá theo thứ trong tuần
       if (data.giaThu && data.giaThu.length > 0) {
         for (const item of data.giaThu) {
+          // bỏ qua giá không hợp lệ hoặc để trống
           if (!item || !item.thu) continue;
 
+          // lưu giá theo thứ
           await db.GiaPhongTuan.create(
             {
               MaPhong: data.maPhong,
@@ -92,8 +92,10 @@ class PhongDAO {
       // lưu giá theo ngày lễ
       if (data.giaLe && data.giaLe.length > 0) {
         for (const item of data.giaLe) {
+          // bỏ qua giá không hợp lệ hoặc để trống
           if (!item || !item.ten) continue;
 
+          // lưu giá theo ngày lễ
           await db.GiaPhongNgayLe.create(
             {
               MaPhong: data.maPhong,
@@ -108,7 +110,7 @@ class PhongDAO {
         }
       }
 
-      // upload hình ảnh phòng lên cloudinary
+      // upload hình ảnh phòng lên cloudinary (Cloud Storage)
       if (files && files.length > 0) {
         const uploadPromises = files.map((file) => {
           return new Promise((resolve, reject) => {
@@ -127,10 +129,10 @@ class PhongDAO {
           });
         });
 
+        // Chờ tất cả hình ảnh được upload và lấy về URL của chúng
         const imageUrls = await Promise.all(uploadPromises);
-        console.log(">>> Uploaded image URLs:", imageUrls);
 
-        // lưu hình ảnh vào bảng HinhAnh
+        // lưu các URL hình vào vào bảng HinhAnh
         await db.HinhAnh.bulkCreate(
           imageUrls.map((url) => ({
             MaPhong: data.maPhong,
@@ -155,6 +157,7 @@ class PhongDAO {
   // Lấy phòng theo mã phòng
   static async getById(maPhong) {
     try {
+      // Tìm phòng cùng các bảng liên quan
       const room = await db.Phong.findOne({
         where: { MaPhong: maPhong },
         include: [
@@ -180,6 +183,7 @@ class PhongDAO {
   // Xoá phòng theo mã phòng
   static async delete(maPhong) {
     try {
+      // Xoá phòng
       await db.Phong.destroy({
         where: { MaPhong: maPhong },
       });
@@ -236,6 +240,7 @@ class PhongDAO {
       // Cập nhật giá tuần
       if (data.giaThu && data.giaThu.length > 0) {
         for (const item of data.giaThu) {
+          // bỏ qua giá không hợp lệ hoặc để trống
           if (!item || !item.thu) continue;
 
           await db.GiaPhongTuan.update(
@@ -257,6 +262,7 @@ class PhongDAO {
       // Cập nhật giá ngày lễ
       if (data.giaLe && data.giaLe.length > 0) {
         for (const item of data.giaLe) {
+          // bỏ qua giá không hợp lệ hoặc để trống
           if (!item || !item.ten) continue;
 
           await db.GiaPhongNgayLe.update(
@@ -289,7 +295,7 @@ class PhongDAO {
 
       // Nếu có file mới được tải lên
       if (files && files.length > 0) {
-        // upload hình ảnh phòng lên cloudinary
+        // upload hình ảnh phòng lên cloudinary (Cloud Storage)
         const uploadPromises = files.map((file) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader
@@ -307,6 +313,7 @@ class PhongDAO {
           });
         });
 
+        // Chờ tất cả hình ảnh được upload và lấy về URL của chúng
         const imageUrls = await Promise.all(uploadPromises);
 
         // lưu hình ảnh vào bảng HinhAnh
@@ -337,7 +344,7 @@ class PhongDAO {
       const wherePhong = {};
       const include = [];
 
-      // 1. Tìm kiếm theo keyword
+      // 1. Tìm kiếm theo keyword (Mã phòng hoặc Tên Phòng)
       if (searchData.keyword) {
         wherePhong[Op.or] = [
           { TenPhong: { [Op.like]: `%${searchData.keyword}%` } },
@@ -381,7 +388,7 @@ class PhongDAO {
         { model: db.GiaPhongTuan, as: "GiaPhongTuan" }
       );
 
-      // 6. Query chính
+      // 6. Thực hiện truy vấn
       const rooms = await db.Phong.findAll({
         where: wherePhong,
         include,
@@ -454,6 +461,7 @@ class PhongDAO {
     }
   }
 
+  // Lấy bảng giá phòng trong khoảng ngày
   static async getPriceRange(maPhong, ngayNhan, ngayTra) {
     try {
       // Chuyển input thành ngày VN

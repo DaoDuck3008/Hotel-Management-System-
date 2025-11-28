@@ -1,6 +1,7 @@
 const { Model } = require("sequelize");
 
 class Phong extends Model {
+  // khai báo các thuộc tính
   static init(sequelize, DataTypes) {
     return super.init(
       {
@@ -25,6 +26,7 @@ class Phong extends Model {
     );
   }
 
+  // Khai báo các quan hệ
   static associate(models) {
     this.belongsTo(models.LoaiPhong, {
       foreignKey: "TenLoaiPhong",
@@ -62,9 +64,11 @@ class Phong extends Model {
   // ----------------------------------------------------------
   // 1. Lấy giaNgay ngày hôm nay của phòng, ưu tiên giá ngày lễ, sau đó là giá theo tuần, cuối cùng là giá cơ bản
   getGiaNgayToday() {
+    // Lấy ngày hiện tại và chuyển sang múi giờ GMT+7
     const now = new Date();
     const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
+    // Lấy thứ trong tuần (1-8, trong đó 8 là Chủ Nhật)
     const weekday = today.getDay() === 0 ? 8 : today.getDay() + 1;
 
     // Ưu tiên giá ngày lễ
@@ -93,9 +97,11 @@ class Phong extends Model {
 
   // 2. Lấy giaGio giờ hôm nay của phòng, ưu tiên giá ngày lễ, sau đó là giá theo tuần, cuối cùng là giá cơ bản
   getGiaGioToday() {
+    // Lấy ngày hiện tại và chuyển sang múi giờ GMT+7
     const now = new Date();
     const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
+    // Lấy thứ trong tuần (1-8, trong đó 8 là Chủ Nhật)
     const weekday = today.getDay() === 0 ? 8 : today.getDay() + 1;
 
     // Ưu tiên giá ngày lễ
@@ -126,15 +132,17 @@ class Phong extends Model {
 
   // 3. Lấy trạng thái hiện tại của phòng
   getCurrentTrangThai() {
+    // Nếu không có trạng thái phòng nào thì trả về Empty
     if (!this.TrangThaiPhong && this.TrangThaiPhong.length === 0) {
       return "Empty";
     }
 
+    // Sắp xếp trạng thái phòng theo thời gian cập nhật giảm dần và lấy trạng thái mới nhất
     const latest = this.TrangThaiPhong.sort(
       (a, b) => new Date(b.ThoiGianCapNhat) - new Date(a.ThoiGianCapNhat)
     )[0];
 
-    // Nếu vì lý do nào đó latest vẫn undefined
+    // Nếu vì lý do nào đó latest bị undefined thì trả về Empty
     if (!latest || !latest.TrangThai) {
       return "Empty";
     }

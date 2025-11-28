@@ -5,16 +5,16 @@ import ExcelJS from "exceljs";
 
 // Hiển thị danh sách phòng
 const index = async (req, res) => {
-  const roomTypes = await db.LoaiPhong.findAll(); // lấy dữ liệu loại phòng
-  const rooms = await PhongDao.getAll();
+  const roomTypes = await db.LoaiPhong.findAll(); // lấy dữ liệu loại phòng phục vụ tìm kiếm
+  const rooms = await PhongDao.getAll(); // lấy dữ liệu phòng từ PhongDao
 
   return res.render("Phong/index.ejs", { roomTypes, rooms });
 };
 
 // Mở form tạo phòng mới
 const create = async (req, res) => {
-  const roomTypes = await db.LoaiPhong.findAll();
-  const amenities = await db.TienIch.findAll();
+  const roomTypes = await db.LoaiPhong.findAll(); // lấy dữ liệu loại phòng
+  const amenities = await db.TienIch.findAll(); // lấy dữ liệu tiện ích
 
   return res.render("Phong/create.ejs", { roomTypes, amenities });
 };
@@ -22,14 +22,12 @@ const create = async (req, res) => {
 // Lưu phòng mới
 const store = async (req, res) => {
   try {
-    // console.log(">>> req.body:", req.body);
-    // console.log(">>> req.files:", req.files);
-
     // Gọi validator để kiểm tra dữ liệu đầu vào
     const { error } = createRoomSchema.validate(req.body, {
       abortEarly: false,
       convert: true,
     });
+    // Nếu dữ liệu không hợp lệ, thì trả về lỗi
     if (error) {
       req.flash(
         "error",
@@ -38,7 +36,13 @@ const store = async (req, res) => {
       return res.redirect("/rooms/create");
     }
 
-    const result = await PhongDao.create(req.body, req.files);
+    const result = await PhongDao.create(req.body, req.files); // gọi DAO để tạo phòng mới
+
+    // Kiểm tra kết quả trả về từ DAO
+    if (!result.success) {
+      req.flash("error", "Tạo phòng thất bại!");
+      return res.redirect("/rooms/create");
+    }
 
     req.flash("success", "Tạo phòng thành công!");
     return res.redirect("/rooms");
@@ -50,28 +54,22 @@ const store = async (req, res) => {
 
 // Xem chi tiết phòng
 const detail = async (req, res) => {
-  const { maPhong } = req.params;
+  const { maPhong } = req.params; // Lấy mã phòng từ tham số URL
 
-  const room = await PhongDao.getById(maPhong);
-
-  const _room = room ? room.toJSON() : null;
-
-  // console.log(">>> room detail:", _room);
+  const room = await PhongDao.getById(maPhong); // Lấy dữ liệu phòng từ DAO
 
   res.render("Phong/detail.ejs", { room: room });
 };
 
 // Mở form chỉnh sửa phòng
 const edit = async (req, res) => {
-  const { maPhong } = req.params;
+  const { maPhong } = req.params; // Lấy mã phòng từ tham số URL
 
-  const roomTypes = await db.LoaiPhong.findAll();
-  const amenities = await db.TienIch.findAll();
-  const room = await PhongDao.getById(maPhong);
+  const roomTypes = await db.LoaiPhong.findAll(); // Lấy dữ liệu loại phòng
+  const amenities = await db.TienIch.findAll(); // Lấy dữ liệu tiện ích
+  const room = await PhongDao.getById(maPhong); // Lấy dữ liệu phòng từ DAO
 
-  // const _room = room ? room.toJSON() : null;
-  // console.log(">>> room edit:", _room);
-
+  // Kiểm tra phòng tồn tại
   if (!room) {
     req.flash("error", "Phòng không tồn tại!");
     return res.redirect("/rooms");
@@ -97,6 +95,7 @@ const update = async (req, res) => {
       abortEarly: false,
       convert: true,
     });
+    // Nếu dữ liệu không hợp lệ, thì trả về lỗi
     if (error) {
       req.flash(
         "error",
@@ -105,8 +104,9 @@ const update = async (req, res) => {
       return res.redirect("/rooms/" + maPhong + "/edit");
     }
 
-    const result = await PhongDao.update(maPhong, req.body, req.files);
+    const result = await PhongDao.update(maPhong, req.body, req.files); // Gọi DAO để cập nhật phòng
 
+    // Kiểm tra kết quả trả về từ DAO
     if (!result.success) {
       req.flash("error", "Cập nhật phòng thất bại!");
       return res.redirect("/rooms");
@@ -122,19 +122,20 @@ const update = async (req, res) => {
 // Xóa phòng
 const destroy = async (req, res) => {
   try {
-    // console.log(">>> delete room: ", req.params);
-    const { maPhong } = req.params;
+    const { maPhong } = req.params; // Lấy mã phòng từ tham số URL
 
-    const room = await PhongDao.getById(maPhong);
+    const room = await PhongDao.getById(maPhong); // Kiểm tra phòng tồn tại
 
+    // Nếu phòng không tồn tại, trả về thông báo lỗi
     if (!room) {
       return res
         .status(404)
         .json({ message: "Phòng không tồn tại!", success: false });
     }
 
-    const result = await PhongDao.delete(maPhong);
+    const result = await PhongDao.delete(maPhong); // Gọi DAO để xóa phòng
 
+    // Kiểm tra kết quả trả về từ DAO
     if (!result.success) {
       return res
         .status(500)
@@ -154,18 +155,15 @@ const destroy = async (req, res) => {
 
 // Tìm kiếm
 const search = async (req, res) => {
-  const rooms = await PhongDao.search(req.query);
-  const roomTypes = await db.LoaiPhong.findAll();
+  const rooms = await PhongDao.search(req.query); // Lấy dữ liệu phòng theo điều kiện tìm kiếm
+  const roomTypes = await db.LoaiPhong.findAll(); // lấy dữ liệu loại phòng phục vụ tìm kiếm
 
   return res.render("Phong/index.ejs", { rooms, roomTypes });
 };
 
 // Thống kê
 const statistics = async (req, res) => {
-  const { typeStats, systemStats } = await PhongDao.statistics();
-
-  // console.log(">>> typeStats:", typeStats);
-  // console.log(">>> systemStats:", systemStats);
+  const { typeStats, systemStats } = await PhongDao.statistics(); // Lấy dữ liệu thống kê
 
   return res.render("Phong/statistics.ejs", { typeStats, systemStats });
 };
