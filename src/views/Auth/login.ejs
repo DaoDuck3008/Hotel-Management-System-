@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập hệ thống</title>
+
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px; /* Giúp hiển thị đẹp trên mobile */
+        font-family: "Inter", sans-serif;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 500px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 32px 30px;
+        box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+        animation: fadeIn 0.4s ease;
+      }
+
+      .login-icon-box {
+        background: #1e73f8;
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 20px auto;
+        color: white;
+        font-size: 26px;
+      }
+
+      .form-control {
+        border-radius: 10px;
+        padding-left: 40px;
+        height: 46px;
+        font-size: 15px;
+      }
+
+      .input-icon {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        color: #888;
+        font-size: 15px;
+      }
+
+      .btn-login {
+        background: #1e73f8;
+        color: white;
+        border-radius: 10px;
+        height: 46px;
+        font-size: 16px;
+        transition: 0.2s;
+      }
+
+      .btn-login:hover {
+        background: #155bd1;
+      }
+
+      .copyright {
+        font-size: 13px;
+        color: #e9e9e9;
+        text-align: center;
+        margin-top: 18px;
+      }
+
+      /* ===================== Responsive ===================== */
+
+      @media (max-width: 576px) {
+        .login-card {
+          padding: 25px 22px;
+          border-radius: 14px;
+        }
+
+        .login-icon-box {
+          width: 55px;
+          height: 55px;
+          font-size: 22px;
+        }
+
+        h3 {
+          font-size: 20px !important;
+        }
+
+        .form-control {
+          height: 44px;
+          font-size: 14px;
+        }
+
+        .btn-login {
+          height: 44px;
+          font-size: 15px;
+        }
+      }
+
+      @media (min-width: 992px) {
+        body {
+          padding: 0;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      class="d-flex justify-content-end pt-1 pe-1"
+      style="position: fixed; top: 0; z-index: 1000"
+    >
+      <%- include('../partials/notification.ejs') %>
+    </div>
+
+    <div class="login-card">
+      <div class="login-icon-box">
+        <i class="fas fa-hotel"></i>
+      </div>
+
+      <h3 class="text-center fw-bold mb-1">Hệ thống quản lý khách sạn</h3>
+      <p class="text-center text-muted mb-4">Đăng nhập để tiếp tục</p>
+
+      <form action="/login" method="POST">
+        <!-- Email -->
+        <div class="mb-3 position-relative">
+          <i class="fas fa-envelope input-icon"></i>
+          <input
+            type="email"
+            name="email"
+            class="form-control"
+            placeholder="admin@hotel.com"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3 position-relative">
+          <i class="fas fa-lock input-icon"></i>
+          <input
+            type="password"
+            name="password"
+            class="form-control"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <!-- Options -->
+        <div
+          class="d-flex justify-content-between align-items-center mb-3 flex-wrap"
+        >
+          <div class="mb-1">
+            <input type="checkbox" id="remember" />
+            <label for="remember" class="text-muted">Ghi nhớ đăng nhập</label>
+          </div>
+
+          <a href="#" class="text-primary small" style="text-decoration: none"
+            >Quên mật khẩu?</a
+          >
+        </div>
+
+        <button type="submit" class="btn btn-login w-100">Đăng nhập</button>
+      </form>
+      <div class="copyright">
+        © 2025 Hotel Management System. All rights reserved.
+      </div>
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</html>
