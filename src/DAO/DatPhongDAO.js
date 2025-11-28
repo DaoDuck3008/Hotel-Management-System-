@@ -120,6 +120,7 @@ class DatPhongDAO {
         include: [
           {
             model: db.KhachHang,
+            as: "KhachHang",
             attributes: ["MaKhachHang", "HoVaTen", "SDT", "Email", "GioiTinh"],
           },
           {

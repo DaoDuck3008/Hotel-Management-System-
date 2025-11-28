@@ -49,16 +49,17 @@ const updateStatus = async (req, res) => {
 const paymentList = async (req, res) => {
   try {
     const db = require("../models/index.js");
-
     // Lấy tất cả đơn đặt phòng đang có phòng Occupied
     const bookings = await db.DatPhong.findAll({
       include: [
         {
           model: db.KhachHang,
+          as: "KhachHang",
           attributes: ["MaKhachHang", "HoVaTen", "SDT", "Email"],
         },
         {
           model: db.ChiTietDatPhong,
+          as: "ChiTiet",
           include: [
             {
               model: db.Phong,
@@ -85,7 +86,7 @@ const paymentList = async (req, res) => {
 
     for (const booking of bookings) {
       // Kiểm tra xem có phòng nào đang Occupied không
-      const hasOccupiedRoom = booking.ChiTietDatPhongs?.some((detail) => {
+      const hasOccupiedRoom = booking.ChiTiet?.some((detail) => {
         const currentStatus = detail.Phong?.TrangThaiPhong?.[0]?.TrangThai;
         return currentStatus === "Occupied";
       });
@@ -97,7 +98,7 @@ const paymentList = async (req, res) => {
       // Kiểm tra xem đơn đã thanh toán chưa
       let isAlreadyPaid = false;
 
-      for (const detail of booking.ChiTietDatPhongs) {
+      for (const detail of booking.ChiTiet) {
         const roomStatusHistory = detail.Phong?.TrangThaiPhong || [];
 
         // Kiểm tra lịch sử trạng thái phòng
@@ -150,10 +151,12 @@ const paymentDetail = async (req, res) => {
       include: [
         {
           model: db.KhachHang,
+          as: "KhachHang",
           attributes: ["MaKhachHang", "HoVaTen", "SDT", "Email"],
         },
         {
           model: db.ChiTietDatPhong,
+          as: "ChiTiet",
           include: [
             {
               model: db.Phong,
@@ -177,7 +180,7 @@ const paymentDetail = async (req, res) => {
     // Kiểm tra xem đơn đã thanh toán chưa (kiểm tra tất cả phòng)
     let isAlreadyPaid = false;
 
-    for (const detail of booking.ChiTietDatPhongs) {
+    for (const detail of booking.ChiTiet) {
       const maPhong = detail.MaPhong;
 
       const roomStatusHistory = await db.TrangThaiPhong.findAll({
@@ -218,7 +221,7 @@ const paymentDetail = async (req, res) => {
     let grandSubtotal = 0;
 
     // Duyệt qua từng phòng
-    for (const detail of booking.ChiTietDatPhongs) {
+    for (const detail of booking.ChiTiet) {
       const room = detail.Phong;
       let roomSubtotal = 0;
       let priceDetails = [];
@@ -353,6 +356,7 @@ const processPayment = async (req, res) => {
         {
           model: db.ChiTietDatPhong,
           attributes: ["MaPhong"],
+          as: "ChiTiet",
         },
       ],
     });
@@ -365,7 +369,7 @@ const processPayment = async (req, res) => {
     }
 
     // Cập nhật trạng thái tất cả phòng về Cleaning
-    for (const detail of booking.ChiTietDatPhongs) {
+    for (const detail of booking.ChiTiet) {
       await DatPhongDAO.updateRoomStatus(detail.MaPhong, "Cleaning");
     }
 
