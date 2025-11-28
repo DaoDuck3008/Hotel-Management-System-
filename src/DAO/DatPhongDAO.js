@@ -135,6 +135,7 @@ class DatPhongDAO {
               },
               {
                 model: db.ChiTietGiaDatPhong,
+                as: "ChiTietGiaDatPhong",
               },
             ],
           },
@@ -385,63 +386,97 @@ class DatPhongDAO {
   }
 
   //Cập nhật edit vào db
-  static async updateBooking(maDatPhong, data) {
+  static async updateBooking(maDatPhong, bookingData) {
     const t = await db.sequelize.transaction();
-
     try {
-      // 1. Lấy booking
+      const {
+        HoVaTen,
+        GioiTinh,
+        NgaySinh,
+        SDT,
+        Email,
+        NgayNhanPhong,
+        NgayTraPhong,
+        rooms,
+      } = bookingData;
+
+      const roomsArray = JSON.parse(rooms);
+
+      // 1. Lấy thông tin booking cũ
       const booking = await db.DatPhong.findOne({
         where: { MaDatPhong: maDatPhong },
         transaction: t,
       });
 
       if (!booking) {
-        await t.rollback();
-        return { success: false, message: "Không tìm thấy đơn đặt phòng" };
+        throw new Error("Không tìm thấy đơn đặt phòng");
       }
 
-      // 2. Cập nhật thông tin khách hàng
+      // 2. Update khách hàng (không tạo mới)
       await db.KhachHang.update(
         {
-          HoVaTen: data.HoVaTen,
-          GioiTinh: data.GioiTinh,
-          NgaySinh: data.NgaySinh || null,
-          SDT: data.SDT,
-          Email: data.Email,
+          HoVaTen,
+          GioiTinh,
+          NgaySinh: NgaySinh || null,
+          SDT,
+          Email,
         },
-        { where: { MaKhachHang: booking.MaKhachHang }, transaction: t }
-      );
-
-      // 3. Cập nhật thông tin đặt phòng
-      await booking.update(
         {
-          NgayDat: data.NgayDat,
-          NgayNhanPhong: data.NgayNhanPhong,
-          NgayTraPhong: data.NgayTraPhong,
-        },
-        { transaction: t }
+          where: { MaKhachHang: booking.MaKhachHang },
+          transaction: t,
+        }
       );
 
-      // 4. Xóa chi tiết phòng cũ
+      // 3. Update thông tin đặt phòng
+      await db.DatPhong.update(
+        {
+          NgayNhanPhong,
+          NgayTraPhong,
+        },
+        {
+          where: { MaDatPhong: maDatPhong },
+          transaction: t,
+        }
+      );
+
+      // 4. XÓA CHI TIẾT GIÁ + CHI TIẾT ĐẶT PHÒNG CŨ
+      const oldCTDP = await db.ChiTietDatPhong.findAll({
+        where: { MaDatPhong: maDatPhong },
+        transaction: t,
+      });
+
+      for (const ct of oldCTDP) {
+        // Xóa giá từng ngày
+        await db.ChiTietGiaDatPhong.destroy({
+          where: { MaCTDatPhong: ct.MaCTDatPhong },
+          transaction: t,
+        });
+      }
+
+      // Xóa chi tiết đặt phòng
       await db.ChiTietDatPhong.destroy({
         where: { MaDatPhong: maDatPhong },
         transaction: t,
       });
 
-      // 5. Thêm chi tiết phòng mới
-      if (data.ChiTiet) {
-        // Ép ChiTiet thành array nếu chỉ có 1 phòng
-        const chiTietArray = Array.isArray(data.ChiTiet)
-          ? data.ChiTiet
-          : [data.ChiTiet];
+      // 5. TẠO LẠI CHI TIẾT ĐẶT PHÒNG + GIÁ THEO NGÀY MỚI
+      for (const room of roomsArray) {
+        const newCT = await db.ChiTietDatPhong.create(
+          {
+            MaDatPhong: maDatPhong,
+            MaPhong: room.MaPhong,
+          },
+          { transaction: t }
+        );
 
-        for (const detail of chiTietArray) {
-          await db.ChiTietDatPhong.create(
+        for (const priceDetail of room.GiaTheoNgay) {
+          await db.ChiTietGiaDatPhong.create(
             {
-              MaDatPhong: maDatPhong,
-              MaPhong: detail.MaPhong,
-              GiaNgay: detail.GiaNgay || 0,
-              GiaGio: detail.GiaGio || 0,
+              MaCTDatPhong: newCT.MaCTDatPhong,
+              Ngay: priceDetail.Ngay,
+              GiaNgay: priceDetail.GiaNgay,
+              GiaGio: priceDetail.GiaGio,
+              LoaiGia: room.LoaiGia,
             },
             { transaction: t }
           );
@@ -449,11 +484,12 @@ class DatPhongDAO {
       }
 
       await t.commit();
+
       return { success: true };
-    } catch (err) {
+    } catch (error) {
       await t.rollback();
-      console.error("Error update booking:", err);
-      return { success: false, message: err.message };
+      console.error("Error updating booking:", error);
+      return { success: false, message: error.message };
     }
   }
 

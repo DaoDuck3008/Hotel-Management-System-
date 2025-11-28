@@ -1,183 +1,446 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chỉnh sửa đơn đặt phòng</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .shadow-card { box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-    .form-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    .removeDetailBtn { cursor: pointer; }
-  </style>
-</head>
-<body>
-<div class="container my-4">
-
-  <h2 class="mb-4">Chỉnh sửa đơn đặt phòng #<%= booking.MaDatPhong %></h2>
-
-  <form action="/bookings/<%= booking.MaDatPhong %>/edit" method="POST" class="shadow-card p-4 rounded">
-
-    <!-- Thông tin khách hàng -->
-    <div class="form-section mb-4">
-      <h5 class="mb-3"><i class="fas fa-user me-2"></i>Thông tin khách hàng</h5>
-      <div class="row mb-2">
-        <div class="col-md-4">
-          <label class="fw-bold">Họ và tên</label>
-          <input type="text" name="HoVaTen" class="form-control" value="<%= booking.KhachHang.HoVaTen %>" required>
-        </div>
-        <div class="col-md-2">
-          <label class="fw-bold">Giới tính</label>
-          <select name="GioiTinh" class="form-control">
-            <option value="Nam" <%= booking.KhachHang.GioiTinh === 'Nam' ? 'selected' : '' %>>Nam</option>
-            <option value="Nữ" <%= booking.KhachHang.GioiTinh === 'Nữ' ? 'selected' : '' %>>Nữ</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="fw-bold">Ngày sinh</label>
-          <input type="date" name="NgaySinh" class="form-control"
-            value="<%= booking.KhachHang.NgaySinh ? new Date(booking.KhachHang.NgaySinh).toISOString().slice(0,10) : '' %>">
-        </div>
-        <div class="col-md-3">
-          <label class="fw-bold">SĐT</label>
-          <input type="text" name="SDT" class="form-control" value="<%= booking.KhachHang.SDT %>">
-        </div>
-      </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chỉnh sửa Đơn Đặt Phòng</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .shadow-card {
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+      .form-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-md-6">
-          <label class="fw-bold">Email</label>
-          <input type="email" name="Email" class="form-control" value="<%= booking.KhachHang.Email %>">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-primary text-white p-3 min-vh-100">
+          <h4 class="text-white mb-4">
+            <i class="fas fa-hotel me-2"></i>Hotel MS
+          </h4>
+          <ul class="nav flex-column">
+            <li class="nav-item mb-2">
+              <a href="/bookings" class="text-white nav-link active"
+                ><i class="fas fa-book me-2"></i>Đơn Đặt Phòng</a
+              >
+            </li>
+            <li class="nav-item mb-2">
+              <a href="/rooms" class="text-white nav-link"
+                ><i class="fas fa-bed me-2"></i>Quản lý Phòng</a
+              >
+            </li>
+            <li class="nav-item mb-2">
+              <a href="/customers" class="text-white nav-link"
+                ><i class="fas fa-users me-2"></i>Khách hàng</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Chỉnh sửa đơn đặt phòng</h2>
+            <a href="/bookings" class="btn btn-secondary"
+              ><i class="fas fa-arrow-left me-1"></i> Quay lại</a
+            >
+          </div>
+
+          <!-- FORM EDIT -->
+          <form
+            action="/bookings/<%= booking.MaDatPhong %>/edit"
+            method="POST"
+            class="shadow-card p-4 rounded"
+          >
+            <input type="hidden" name="rooms" id="roomsInput" />
+
+            <!-- KHÁCH HÀNG -->
+            <div class="form-section mb-4">
+              <h5 class="mb-3">
+                <i class="fas fa-user me-2"></i>Thông tin khách hàng
+              </h5>
+
+              <div class="row mb-2">
+                <div class="col-md-4">
+                  <label class="fw-bold">Họ và tên</label>
+                  <input
+                    type="text"
+                    name="HoVaTen"
+                    class="form-control"
+                    required
+                    value="<%= booking.KhachHang.HoVaTen %>"
+                  />
+                </div>
+
+                <div class="col-md-2">
+                  <label class="fw-bold">Giới tính</label>
+                  <input
+                    type="text"
+                    name="GioiTinh"
+                    class="form-control"
+                    required
+                    value="<%= booking.KhachHang.GioiTinh %>"
+                  />
+                </div>
+
+                <div class="col-md-3">
+                  <label class="fw-bold">Ngày sinh</label>
+                  <input
+                    type="date"
+                    name="NgaySinh"
+                    class="form-control"
+                    required
+                    value="<%= booking.KhachHang.NgaySinh %>"
+                  />
+                </div>
+
+                <div class="col-md-3">
+                  <label class="fw-bold">SĐT</label>
+                  <input
+                    type="text"
+                    name="SDT"
+                    class="form-control"
+                    required
+                    value="<%= booking.KhachHang.SDT %>"
+                  />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <label class="fw-bold">Email</label>
+                  <input
+                    type="email"
+                    name="Email"
+                    class="form-control"
+                    required
+                    value="<%= booking.KhachHang.Email %>"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- NGÀY NHẬN/TRẢ -->
+            <div class="form-section mb-4">
+              <h5 class="mb-3">
+                <i class="fas fa-calendar-alt me-2"></i>Thời gian đặt phòng
+              </h5>
+
+              <div class="row">
+                <div class="col-md-4 mb-2">
+                  <label class="fw-bold">Ngày nhận</label>
+                  <input
+                    type="date"
+                    name="NgayNhanPhong"
+                    class="form-control"
+                    required
+                    value="<%= booking.NgayNhanPhong.toISOString().slice(0, 10) %>"
+                    />
+                </div>
+
+                <div class="col-md-4 mb-2">
+                  <label class="fw-bold">Ngày trả</label>
+                  <input
+                    type="date"
+                    name="NgayTraPhong"
+                    class="form-control"
+                    required
+                    value="<%= booking.NgayTraPhong.toISOString().slice(0, 10) %>"
+                    />
+                </div>
+              </div>
+            </div>
+
+            <!-- DANH SÁCH PHÒNG -->
+            <div class="form-section mb-4">
+              <h5 class="mb-3"><i class="fas fa-door-open me-2"></i>Danh sách phòng</h5>
+
+              <div id="roomDetails">
+
+                <% booking.ChiTiet.forEach((room, idx) => { %>
+                  <div class="detail-item border rounded p-3 mb-3">
+                    <div class="row">
+                  
+                      <!-- Mã phòng -->
+                      <div class="col-md-3 mb-2">
+                        <label class="fw-bold">Mã phòng</label>
+                        <select class="form-select room-select" name="MaPhong[]" required>
+                          <option value="">-- Chọn phòng --</option>
+                  
+                          <% allRooms.forEach(r => { %>
+                            <option value="<%= r.MaPhong %>"
+                              <%= r.MaPhong === room.MaPhong ? "selected" : "" %>>
+                              <%= r.MaPhong %> - <%= r.TenPhong %>
+                            </option>
+                          <% }) %>
+                        </select>
+                      </div>
+                  
+                      <!-- Loại giá -->
+                      <div class="col-md-2 mb-2">
+                        <label class="fw-bold">Loại giá</label>
+                        <select class="form-select" name="LoaiGia[]" required>
+                          <option value="Giá Ngày" <%= room.ChiTietGiaDatPhong[0].LoaiGia === "Giá Ngày" ? "selected" : "" %>>Giá ngày</option>
+                          <option value="Giá Giờ" <%= room.ChiTietGiaDatPhong[0].LoaiGia === "Giá Giờ" ? "selected" : "" %>>Giá giờ</option>
+                        </select>
+                      </div>
+                  
+                      <!-- Giá từng ngày -->
+                      <div class="col-md-6 mb-2">
+                        <label class="fw-bold">Giá theo từng ngày</label>
+                  
+                        <div class="price-detail-list border rounded p-2"
+                          style="background:#f0f0f0;max-height:200px;overflow:auto;">
+                          
+                          <% room.ChiTietGiaDatPhong.forEach(item => { %>
+                            <div class="d-flex justify-content-between border-bottom py-1">
+                              <span><%= item.Ngay %></span>
+                              <strong>Ngày: <%= item.GiaNgay.toLocaleString() %> |
+                                      Giờ: <%= item.GiaGio.toLocaleString() %></strong>
+                            </div>
+                          <% }) %>
+                  
+                        </div>
+                  
+                        <!-- INPUT HIDDEN SỬA ĐÚNG -->
+                        <input type="hidden" class="gia-theo-ngay-hidden"
+                               value='<%= JSON.stringify(room.ChiTietGiaDatPhong) %>' />
+                      </div>
+                  
+                      <!-- NÚT XÓA PHÒNG -->
+                      <% if (idx === 0) { %>
+                        <div class="col-md-1 d-flex align-items-start">
+                          <!-- Để trống chỗ nút xóa cho phòng đầu tiên -->
+                        </div>
+                      <% } else { %>
+                      <div class="col-md-1 d-flex align-items-start">
+                        <button type="button" class="btn btn-danger btn-sm remove-room-btn">Xóa</button>
+                      </div>
+                      <% } %>
+                    </div>
+                  </div>
+                  
+                <% }) %>
+              </div>
+
+              <!-- Thêm phòng -->
+              <button type="button" id="addRoomBtn" class="btn btn-outline-primary mb-2">
+                <i class="fas fa-plus"></i> Thêm phòng
+              </button>
+            </div>
+
+            <div class="text-end">
+              <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-save me-1"></i> Lưu thay đổi
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
-    <!-- Thời gian đặt phòng -->
-    <div class="form-section mb-4">
-      <h5 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Thời gian đặt phòng</h5>
-      <div class="row">
-        <div class="col-md-4 mb-2">
-          <label class="fw-bold">Ngày đặt</label>
-          <input type="date" name="NgayDat" class="form-control" value="<%= booking.NgayDat ? new Date(booking.NgayDat).toISOString().slice(0,10) : '' %>">
-        </div>
-        <div class="col-md-4 mb-2">
-          <label class="fw-bold">Ngày nhận</label>
-          <input type="date" name="NgayNhanPhong" class="form-control" value="<%= booking.NgayNhanPhong ? new Date(booking.NgayNhanPhong).toISOString().slice(0,10) : '' %>">
-        </div>
-        <div class="col-md-4 mb-2">
-          <label class="fw-bold">Ngày trả</label>
-          <input type="date" name="NgayTraPhong" class="form-control" value="<%= booking.NgayTraPhong ? new Date(booking.NgayTraPhong).toISOString().slice(0,10) : '' %>">
-        </div>
-      </div>
-    </div>
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Chi tiết phòng -->
-    <div class="form-section mb-4">
-      <h5 class="mb-3"><i class="fas fa-door-open me-2"></i>Danh sách phòng</h5>
-      <div id="roomDetails">
-        <% booking.ChiTiet.forEach((ct, index) => { %>
-        <div class="detail-item border rounded p-3 mb-3 bg-white shadow-sm">
+    <script>
+
+      // Gán sự kiện xóa cho các phòng cũ
+      document.querySelectorAll(".remove-room-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          btn.closest(".detail-item").remove();
+        });
+      });
+
+      /* ========== GIỮ NGUYÊN CÁC FUNCTION loadAvailableRooms & updatePriceRange
+                     từ file create.ejs vì chúng hoạt động tốt ========== */
+
+      function normalizeDateInput(dateStr) {
+        if (!dateStr) return null;
+        if (dateStr.includes("/")) {
+          const [dd, mm, yyyy] = dateStr.split("/");
+          return `${yyyy}-${mm}-${dd}`;
+        }
+        return dateStr;
+      }
+
+      function getSafeDateInput(selector) {
+        return normalizeDateInput(document.querySelector(selector).value);
+      }
+
+      async function loadAvailableRooms(selectElement) {
+        const from = getSafeDateInput("input[name='NgayNhanPhong']");
+        const to = getSafeDateInput("input[name='NgayTraPhong']");
+
+        if (!from || !to) return;
+
+        const res = await fetch(`/api/rooms/available?from=${from}&to=${to}`);
+        const data = await res.json();
+
+        selectElement.innerHTML =
+          '<option value="">-- Chọn phòng --</option>';
+
+        if (!data.rooms || data.rooms.length === 0) {
+          selectElement.innerHTML += `<option disabled>Không có phòng trống</option>`;
+          return;
+        }
+
+        data.rooms.forEach((room) => {
+          selectElement.innerHTML += `
+            <option value="${room.MaPhong}">
+              ${room.MaPhong} - ${room.TenPhong}
+            </option>
+          `;
+        });
+      }
+
+      async function updatePriceRange(selectElement) {
+        const block = selectElement.closest(".detail-item");
+        const MaPhong = selectElement.value;
+
+        const from = getSafeDateInput("input[name='NgayNhanPhong']");
+        const to = getSafeDateInput("input[name='NgayTraPhong']");
+
+        if (!MaPhong || !from || !to) return;
+
+        const res = await fetch(
+          `/api/rooms/price-range?MaPhong=${MaPhong}&from=${from}&to=${to}`
+        );
+        const data = await res.json();
+
+        const list = block.querySelector(".price-detail-list");
+        const inputGiaTheoNgay = block.querySelector(".gia-theo-ngay-hidden");
+
+        list.innerHTML = "";
+
+        let giaTheoNgay = [];
+
+        data.prices.forEach((item) => {
+          list.innerHTML += `
+            <div class="d-flex justify-content-between border-bottom py-1">
+              <span>${item.date}</span>
+              <strong>Ngày: ${item.giaNgay.toLocaleString()} | Giờ: ${item.giaGio.toLocaleString()}</strong>
+            </div>
+          `;
+
+          giaTheoNgay.push({
+            Ngay: item.date,
+            GiaNgay: item.giaNgay,
+            GiaGio: item.giaGio,
+          });
+        });
+
+        inputGiaTheoNgay.value = JSON.stringify(giaTheoNgay);
+      }
+
+      // Khi đổi ngày -> cập nhật danh sách phòng trống
+      ["NgayNhanPhong", "NgayTraPhong"].forEach((name) => {
+        document
+          .querySelector(`input[name='${name}']`)
+          .addEventListener("change", () => {
+            document.querySelectorAll(".room-select").forEach((select) => {
+              loadAvailableRooms(select);
+            });
+          });
+      });
+
+      // Khi đổi phòng -> update giá
+      document.addEventListener("change", (e) => {
+        if (e.target.classList.contains("room-select")) {
+          updatePriceRange(e.target);
+        }
+      });
+
+      // =============== ADD ROOM ===============
+      document.getElementById("addRoomBtn").addEventListener("click", () => {
+        const container = document.getElementById("roomDetails");
+
+        const newBlock = document.createElement("div");
+        newBlock.classList.add(
+          "detail-item",
+          "border",
+          "rounded",
+          "p-3",
+          "mb-3"
+        );
+
+        newBlock.innerHTML = `
           <div class="row">
             <div class="col-md-3 mb-2">
-              <label class="fw-bold">Chọn phòng</label>
-              <select name="ChiTiet[<%= index %>][MaPhong]" class="form-select room-select" required>
-                <% rooms.forEach(room => { %>
-                  <option value="<%= room.MaPhong %>" <%= room.MaPhong === ct.MaPhong ? 'selected' : '' %>>
-                    <%= room.TenPhong %> - <%= room.LoaiPhong.TenLoai %>
-                  </option>
-                <% }) %>
+              <label class="fw-bold">Mã phòng</label>
+              <select class="form-select room-select" name="MaPhong[]" required>
+                <option value="">-- Chọn phòng trống --</option>
               </select>
             </div>
+
             <div class="col-md-2 mb-2">
-              <label class="fw-bold">Giá ngày</label>
-              <input type="number" name="ChiTiet[<%= index %>][GiaNgay]" class="form-control" value="<%= ct.GiaNgay %>" readonly>
+              <label class="fw-bold">Loại giá</label>
+              <select class="form-select" name="LoaiGia[]" required>
+                <option value="Giá Ngày">Giá ngày</option>
+                <option value="Giá Giờ">Giá giờ</option>
+              </select>
             </div>
-            <div class="col-md-2 mb-2">
-              <label class="fw-bold">Giá giờ</label>
-              <input type="number" name="ChiTiet[<%= index %>][GiaGio]" class="form-control" value="<%= ct.GiaGio %>" readonly>
+
+            <div class="col-md-6 mb-2">
+              <label class="fw-bold">Giá theo từng ngày</label>
+              <div class="price-detail-list border rounded p-2"
+                   style="background:#f0f0f0;max-height:200px;overflow:auto;">
+              </div>
+
+              <input type="hidden" class="gia-theo-ngay-hidden">
             </div>
-            <div class="col-md-1 text-end">
-              <button type="button" class="btn btn-danger btn-sm removeDetailBtn"><i class="fas fa-trash"></i> Xóa</button>
+
+            <div class="col-md-1 d-flex align-items-start">
+              <button type="button" class="btn btn-danger btn-sm remove-room-btn">Xóa</button>
             </div>
           </div>
-        </div>
-        <% }) %>
-      </div>
-      <button type="button" id="addRoomBtn" class="btn btn-outline-primary mb-2"><i class="fas fa-plus"></i> Thêm phòng</button>
-    </div>
+        `;
 
-    <div class="text-end">
-      <button type="submit" class="btn btn-success px-4"><i class="fas fa-save me-1"></i> Lưu thay đổi</button>
-      <a href="/bookings" class="btn btn-secondary">Quay lại</a>
-    </div>
+        container.appendChild(newBlock);
 
-  </form>
-</div>
+        loadAvailableRooms(newBlock.querySelector(".room-select"));
 
-<script>
-let index = <%= booking.ChiTiet.length %>;
+        newBlock
+          .querySelector(".remove-room-btn")
+          .addEventListener("click", () => newBlock.remove());
+      });
 
-// Cập nhật giá theo phòng chọn
-function updatePriceFromSelect(select) {
-  const block = select.closest(".detail-item");
-  const option = select.selectedOptions[0];
-  block.querySelector(".room-price-day")?.setAttribute('value', option.dataset.giaNgay || 0);
-  block.querySelector(".room-price-hour")?.setAttribute('value', option.dataset.giaGio || 0);
-}
+      // =============== SUBMIT -> rooms[] ===============
+      document.querySelector("form").addEventListener("submit", function () {
+        const roomBlocks = document.querySelectorAll(".detail-item");
 
-document.querySelectorAll(".room-select").forEach(select => {
-  updatePriceFromSelect(select);
-  select.addEventListener("change", () => updatePriceFromSelect(select));
-});
+        const rooms = [];
 
-// Thêm phòng mới
-document.getElementById("addRoomBtn").addEventListener("click", () => {
-  const block = document.createElement("div");
-  block.className = "detail-item border rounded p-3 mb-3 bg-white shadow-sm";
+        roomBlocks.forEach((block) => {
+          const MaPhong = block.querySelector("select[name='MaPhong[]']").value;
+          const LoaiGia = block.querySelector("select[name='LoaiGia[]']").value;
 
-  let options = '';
-  <% rooms.forEach(room => { %>
-    options += `<option value="<%= room.MaPhong %>" data-gia-ngay="<%= room.GiaNgay %>" data-gia-gio="<%= room.GiaGio %>"><%= room.TenPhong %> - <%= room.LoaiPhong.TenLoai %></option>`;
-  <% }) %>
+          const giaTheoNgay = JSON.parse(
+            block.querySelector(".gia-theo-ngay-hidden").value
+          );
 
-  block.innerHTML = `
-    <div class="row">
-      <div class="col-md-3 mb-2">
-        <label class="fw-bold">Chọn phòng</label>
-        <select name="ChiTiet[${index}][MaPhong]" class="form-select room-select" required>
-          ${options}
-        </select>
-      </div>
-      <div class="col-md-2 mb-2">
-        <label class="fw-bold">Giá ngày</label>
-        <input type="number" name="ChiTiet[${index}][GiaNgay]" class="form-control room-price-day" readonly>
-      </div>
-      <div class="col-md-2 mb-2">
-        <label class="fw-bold">Giá giờ</label>
-        <input type="number" name="ChiTiet[${index}][GiaGio]" class="form-control room-price-hour" readonly>
-      </div>
-      <div class="col-md-1 text-end">
-        <button type="button" class="btn btn-danger btn-sm removeDetailBtn"><i class="fas fa-trash"></i> Xóa</button>
-      </div>
-    </div>
-  `;
-  document.getElementById("roomDetails").appendChild(block);
+          rooms.push({
+            MaPhong,
+            LoaiGia,
+            GiaTheoNgay: giaTheoNgay,
+          });
+        });
 
-  const newSelect = block.querySelector(".room-select");
-  updatePriceFromSelect(newSelect);
-  newSelect.addEventListener("change", () => updatePriceFromSelect(newSelect));
-
-  index++;
-});
-
-// Xóa phòng
-document.addEventListener("click", (e) => {
-  if (e.target.closest(".removeDetailBtn")) {
-    e.target.closest(".detail-item").remove();
-  }
-});
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+        document.getElementById("roomsInput").value = JSON.stringify(rooms);
+      });
+    </script>
+  </body>
 </html>

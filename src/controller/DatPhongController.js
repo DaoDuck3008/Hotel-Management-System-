@@ -72,56 +72,34 @@ const editForm = async (req, res) => {
     const { maDatPhong } = req.params;
 
     const booking = await DatPhongDAO.getBookingById(maDatPhong);
-    const rooms = await DatPhongDAO.getAvailableRooms();
-    const customers = await DatPhongDAO.getAllCustomers();
+    const allRooms = await PhongDAO.getAll();
 
     if (!booking) {
       req.flash("error", "Không tìm thấy đơn đặt phòng");
       return res.redirect("/bookings");
     }
 
-    res.render("DatPhong/edit.ejs", { booking, rooms, customers });
+    req.flash("success", "Tải form chỉnh sửa thành công");
+    res.render("DatPhong/edit.ejs", { booking, allRooms });
   } catch (error) {
     console.error(error);
     req.flash("error", "Không thể tải form chỉnh sửa");
     return res.redirect("/bookings");
   }
 };
+
 export const edit = async (req, res) => {
   try {
     const { maDatPhong } = req.params;
-
-    const {
-      HoVaTen,
-      GioiTinh,
-      NgaySinh,
-      SDT,
-      Email,
-      NgayDat,
-      NgayNhanPhong,
-      NgayTraPhong,
-      ChiTiet,
-    } = req.body;
-
-    const updateData = {
-      HoVaTen,
-      GioiTinh,
-      NgaySinh,
-      SDT,
-      Email,
-      NgayDat,
-      NgayNhanPhong,
-      NgayTraPhong,
-      ChiTiet,
-    };
-
-    const result = await DatPhongDAO.updateBooking(maDatPhong, updateData);
+    console.log(">>> req.body:", req.body);
+    const result = await DatPhongDAO.updateBooking(maDatPhong, req.body);
 
     if (!result.success) {
       req.flash("error", result.message);
       return res.redirect(`/bookings/${maDatPhong}/edit`);
     }
 
+    console.log(">>> Đặt phòng thành công");
     req.flash("success", "Cập nhật đơn đặt phòng thành công");
     return res.redirect("/bookings");
   } catch (error) {
