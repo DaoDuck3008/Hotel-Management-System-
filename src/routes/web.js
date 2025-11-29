@@ -33,17 +33,17 @@ const initWebRoutes = (app) => {
   ); // Cập nhật phòng
 
   // Bộ phận lễ tân
-  router.get("/receptions", LeTanController.index);
+  router.get("/receptions", LeTanController.index); //Lấy thống kê và danh sách phòng
   router.put(
     "/receptions/update-status/:maPhong",
     LeTanController.updateStatus
-  );
-  router.get("/receptions/payment", LeTanController.paymentList);
-  router.get("/receptions/payment/:maDatPhong", LeTanController.paymentDetail);
+  ); //cập nhật trạng thái phòng
+  router.get("/receptions/payment", LeTanController.paymentList); //lấy danh sách đơn đặt phòng
+  router.get("/receptions/payment/:maDatPhong", LeTanController.paymentDetail); //Lấy thông tin đơn đặt phòng đó
   router.post(
     "/receptions/payment/:maDatPhong",
     LeTanController.processPayment
-  );
+  ); //Thanh toán phòng
 
   //BookRooms
   router.get("/bookings", DatPhongController.index);

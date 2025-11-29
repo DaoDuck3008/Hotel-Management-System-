@@ -135,7 +135,12 @@ class Phong extends Model {
         new Date(bookings.ThoiGianCapNhat) - new Date(a.ThoiGianCapNhat)
     )[0];
 
-    return latest.TrangThai || "Empty";
+    // Nếu vì lý do nào đó latest vẫn undefined
+    if (!latest || !latest.TrangThai) {
+      return "Empty";
+    }
+
+    return latest.TrangThai;
   }
 }
 
