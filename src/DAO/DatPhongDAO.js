@@ -89,6 +89,7 @@ class DatPhongDAO {
         empty: 0,
         occupied: 0,
         cleaning: 0,
+        booked: 0,
       };
 
       rooms.forEach((room) => {
@@ -102,6 +103,9 @@ class DatPhongDAO {
             break;
           case "Cleaning":
             stats.cleaning++;
+            break;
+          case "Booked":
+            stats.booked++;
             break;
         }
       });
@@ -287,7 +291,19 @@ class DatPhongDAO {
           );
         }
       }
+      for (const room of roomsArray) {
+        const now = new Date();
+        const vietnamTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
+        await db.TrangThaiPhong.create(
+          {
+            MaPhong: room.MaPhong,
+            ThoiGianCapNhat: vietnamTime,
+            TrangThai: "Booked",
+          },
+          { transaction: t }
+        );
+      }
       await t.commit();
 
       return { success: true, maDatPhong: newBooking.MaDatPhong };

@@ -77,32 +77,29 @@ const initWebRoutes = (app) => {
   ); // Cập nhật phòng
 
   // Bộ phận lễ tân
-  router.get("/receptions", LeTanController.index); //Lấy thống kê và danh sách phòng
-  router.get("/receptions", checkPermission(["LeTan"]), LeTanController.index);
+  router.get("/receptions", checkPermission(["LeTan"]), LeTanController.index); // Trang lễ tân hiện thống kê phòng
   router.put(
     "/receptions/update-status/:maPhong",
     checkPermission(["LeTan"]),
     LeTanController.updateStatus
   ); //cập nhật trạng thái phòng
-  router.get("/receptions/payment", LeTanController.paymentList); //lấy danh sách đơn đặt phòng
-  router.get("/receptions/payment/:maDatPhong", LeTanController.paymentDetail); //Lấy thông tin đơn đặt phòng đó
   router.get(
     "/receptions/payment",
     checkPermission(["LeTan"]),
     LeTanController.paymentList
-  );
+  ); //lấy danh sách các phòng cần thanh toán
   router.get(
     "/receptions/payment/:maDatPhong",
     checkPermission(["LeTan"]),
     LeTanController.paymentDetail
-  );
+  ); //lấy chi tiết đơn thanh toán
   router.post(
     "/receptions/payment/:maDatPhong",
     checkPermission(["LeTan"]),
     LeTanController.processPayment
-  ); //Thanh toán phòng
+  ); //xử lý thanh toán
 
-  //BookRooms
+  //Bộ Phận kinh doanh - Đặt phòng
   router.get(
     "/bookings",
     checkPermission(["KinhDoanh"]),

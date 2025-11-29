@@ -21,7 +21,7 @@ const updateStatus = async (req, res) => {
     const { status } = req.body;
 
     // Validate status
-    const validStatuses = ["Empty", "Occupied", "Cleaning"];
+    const validStatuses = ["Empty", "Occupied", "Cleaning", "Booked"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -49,8 +49,12 @@ const updateStatus = async (req, res) => {
 const paymentList = async (req, res) => {
   try {
     const db = require("../models/index.js");
-    // Lấy tất cả đơn đặt phòng đang có phòng Occupied
+
+    // Lấy đơn: có phòng Occupied và chưa thanh toán
     const bookings = await db.DatPhong.findAll({
+      where: {
+        TrangThaiThanhToan: "ChuaThanhToan",
+      },
       include: [
         {
           model: db.KhachHang,
@@ -71,7 +75,7 @@ const paymentList = async (req, res) => {
                   as: "TrangThaiPhong",
                   separate: true,
                   order: [["ThoiGianCapNhat", "DESC"]],
-                  limit: 10,
+                  limit: 1,
                 },
               ],
             },
@@ -81,51 +85,13 @@ const paymentList = async (req, res) => {
       order: [["NgayDat", "DESC"]],
     });
 
-    // Lọc đơn: có ít nhất 1 phòng Occupied và chưa thanh toán
-    const unpaidBookings = [];
-
-    for (const booking of bookings) {
-      // Kiểm tra xem có phòng nào đang Occupied không
-      const hasOccupiedRoom = booking.ChiTiet?.some((detail) => {
+    // Lọc chỉ hiển thị đơn có ít nhất 1 phòng Occupied
+    const unpaidBookings = bookings.filter((booking) => {
+      return booking.ChiTiet?.some((detail) => {
         const currentStatus = detail.Phong?.TrangThaiPhong?.[0]?.TrangThai;
         return currentStatus === "Occupied";
       });
-
-      if (!hasOccupiedRoom) {
-        continue;
-      }
-
-      // Kiểm tra xem đơn đã thanh toán chưa
-      let isAlreadyPaid = false;
-
-      for (const detail of booking.ChiTiet) {
-        const roomStatusHistory = detail.Phong?.TrangThaiPhong || [];
-
-        // Kiểm tra lịch sử trạng thái phòng
-        for (let i = 0; i < roomStatusHistory.length - 1; i++) {
-          const current = roomStatusHistory[i];
-          const previous = roomStatusHistory[i + 1];
-
-          // Nếu Occupied -> Cleaning -> Occupied (sau ngày nhận phòng)
-          // => Đã thanh toán rồi
-          if (
-            current.TrangThai === "Occupied" &&
-            previous.TrangThai === "Cleaning" &&
-            new Date(current.ThoiGianCapNhat) > new Date(booking.NgayNhanPhong)
-          ) {
-            isAlreadyPaid = true;
-            break;
-          }
-        }
-
-        if (isAlreadyPaid) break;
-      }
-
-      // Chỉ thêm vào danh sách nếu chưa thanh toán
-      if (!isAlreadyPaid) {
-        unpaidBookings.push(booking);
-      }
-    }
+    });
 
     return res.render("LeTan/payment-list.ejs", {
       bookings: unpaidBookings,
@@ -177,36 +143,8 @@ const paymentDetail = async (req, res) => {
       return res.redirect("/receptions/payment");
     }
 
-    // Kiểm tra xem đơn đã thanh toán chưa (kiểm tra tất cả phòng)
-    let isAlreadyPaid = false;
-
-    for (const detail of booking.ChiTiet) {
-      const maPhong = detail.MaPhong;
-
-      const roomStatusHistory = await db.TrangThaiPhong.findAll({
-        where: { MaPhong: maPhong },
-        order: [["ThoiGianCapNhat", "DESC"]],
-        limit: 10,
-      });
-
-      for (let i = 0; i < roomStatusHistory.length - 1; i++) {
-        const current = roomStatusHistory[i];
-        const previous = roomStatusHistory[i + 1];
-
-        if (
-          current.TrangThai === "Occupied" &&
-          previous.TrangThai === "Cleaning" &&
-          current.ThoiGianCapNhat > new Date(booking.NgayNhanPhong)
-        ) {
-          isAlreadyPaid = true;
-          break;
-        }
-      }
-
-      if (isAlreadyPaid) break;
-    }
-
-    if (isAlreadyPaid) {
+    // Kiểm tra xem đơn đã thanh toán chưa
+    if (booking.TrangThaiThanhToan === "DaThanhToan") {
       req.flash("error", "Đơn đặt phòng này đã được thanh toán");
       return res.redirect("/receptions/payment");
     }
@@ -346,7 +284,6 @@ const paymentDetail = async (req, res) => {
 const processPayment = async (req, res) => {
   try {
     const { maDatPhong } = req.params;
-
     const db = require("../models/index.js");
 
     // Lấy tất cả phòng trong đơn
@@ -372,6 +309,12 @@ const processPayment = async (req, res) => {
     for (const detail of booking.ChiTiet) {
       await DatPhongDAO.updateRoomStatus(detail.MaPhong, "Cleaning");
     }
+
+    // CẬP NHẬT TRẠNG THÁI THANH TOÁN
+    await db.DatPhong.update(
+      { TrangThaiThanhToan: "DaThanhToan" },
+      { where: { MaDatPhong: maDatPhong } }
+    );
 
     return res.status(200).json({
       success: true,
