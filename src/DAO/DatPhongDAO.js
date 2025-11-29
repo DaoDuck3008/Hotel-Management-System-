@@ -82,6 +82,8 @@ class DatPhongDAO {
     try {
       const rooms = await this.getAllRoomsWithStatus();
 
+      console.log("Fetched rooms for statistics:", rooms);
+
       const stats = {
         total: rooms.length,
         empty: 0,
