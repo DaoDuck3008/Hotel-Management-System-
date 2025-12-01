@@ -5,6 +5,7 @@ import upload from "../middlewares/upload.js";
 import DatPhongController from "../controller/DatPhongController.js";
 import AuthController from "../controller/AuthController.js";
 import checkPermission from "../middlewares/checkPermission.js";
+import NhanVienController from "../controller/NhanVienController.js";
 
 const router = express.Router();
 
@@ -22,6 +23,14 @@ const initWebRoutes = (app) => {
   router.post("/login", AuthController.login);
   router.get("/logout", AuthController.logout);
 
+  // ======= Nhan Vien routes =========
+  router.get("/employees", NhanVienController.index);
+  router.get("/employees/create", NhanVienController.create);
+  router.post("/employees", upload.single("image"), NhanVienController.store);
+  router.post("/employees/update/:MaNV", NhanVienController.update);
+
+  router.get("/employees/delete/:MaNV", NhanVienController.destroy);
+  router.get("/employees/edit/:MaNV", NhanVienController.edit);
   //  ===== Phong routes =====
   router.get(
     "/rooms",

@@ -14,6 +14,8 @@ class NhanVien extends Model {
         ImgURL: { type: DataTypes.STRING(255), allowNull: true },
         TrangThai: { type: DataTypes.STRING(20), allowNull: true },
         Password: { type: DataTypes.STRING(255), allowNull: false },
+        GioiTinh: { type: DataTypes.STRING(10), allowNull: true },
+        DiaChi: { type: DataTypes.STRING(255), allowNull: true },
       },
       { sequelize, tableName: "NhanVien", timestamps: false }
     );
