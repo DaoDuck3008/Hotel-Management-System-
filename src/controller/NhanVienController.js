@@ -21,20 +21,44 @@ const create = async (req, res) => {
 };
 
 const store = async (req, res) => {
-  const result = await NhanVienDAO.create(req.body);
+  const result = await NhanVienDAO.create(req.body, req.file);
+
+  if (!result.success) {
+    console.error("Error in create NhanViencontroller:", result.message);
+    return res.redirect("/employees");
+  }
   return res.redirect("/employees");
 };
 
 const edit = async (req, res) => {
   const { MaNV } = req.params;
   const employee = await NhanVienDAO.getById(MaNV);
+
+  if (!employee) {
+    console.error("Error in edit NhanViencontroller: Nhân Viên không tồn tại!");
+    req.flash("error", "Nhân Viên không tồn tại!");
+    return res.redirect("/employees");
+  }
+
   return res.render("NhanSu/edit.ejs", { employee });
 };
 
 const update = async (req, res) => {
-  const MaNV = req.params.MaNV;
-  const result = await NhanVienDAO.update(req.body, MaNV);
-  return res.redirect("/employees", { result });
+  try {
+    console.log("Update NhanVien with data:", req.file);
+    const MaNV = req.params.MaNV;
+    const result = await NhanVienDAO.update(req.body, req.file, MaNV);
+
+    if (!result.success) {
+      console.error("Error in update NhanViencontroller:", result.message);
+      return res.redirect("/employees");
+    }
+
+    return res.redirect("/employees");
+  } catch (error) {
+    console.error("Error in update NhanViencontroller:", error);
+    return res.redirect("/employees");
+  }
 };
 
 const destroy = async (req, res) => {

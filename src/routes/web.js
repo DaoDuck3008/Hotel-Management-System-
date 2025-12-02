@@ -27,10 +27,15 @@ const initWebRoutes = (app) => {
   router.get("/employees", NhanVienController.index);
   router.get("/employees/create", NhanVienController.create);
   router.post("/employees", upload.single("image"), NhanVienController.store);
-  router.post("/employees/update/:MaNV", NhanVienController.update);
+  router.post(
+    "/employees/update/:MaNV",
+    upload.single("image"),
+    NhanVienController.update
+  );
 
   router.get("/employees/delete/:MaNV", NhanVienController.destroy);
   router.get("/employees/edit/:MaNV", NhanVienController.edit);
+
   //  ===== Phong routes =====
   router.get(
     "/rooms",
