@@ -41,7 +41,7 @@ const login = async (req, res) => {
 
       case "NhanSu":
         req.flash("success", "Đăng nhập thành công!");
-        return res.redirect("/");
+        return res.redirect("/employees");
 
       case "KinhDoanh":
         req.flash("success", "Đăng nhập thành công!");

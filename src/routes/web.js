@@ -24,7 +24,11 @@ const initWebRoutes = (app) => {
   router.get("/logout", AuthController.logout);
 
   // ======= Nhan Vien routes =========
-  router.get("/employees", NhanVienController.index);
+  router.get(
+    "/employees",
+    checkPermission(["NhanSu"]),
+    NhanVienController.index
+  );
   router.get("/employees/create", NhanVienController.create);
   router.post("/employees", upload.single("image"), NhanVienController.store);
   router.post(
@@ -40,7 +44,7 @@ const initWebRoutes = (app) => {
   //  ===== Phong routes =====
   router.get(
     "/rooms",
-    checkPermission(["Phong", "KinhDoanh", "LeTan"]),
+    checkPermission(["Phong", "KinhDoanh", "LeTan", "NhanSu"]),
     PhongController.index
   ); // Lấy danh sách phòng
   router.get(
