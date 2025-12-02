@@ -108,11 +108,9 @@
 
             <% if (employee.Password) { %>
             <div class="col-12">
-              <p class="mb-0 detail-label text-danger">
-                Mật Khẩu (Để kiểm tra):
-              </p>
-              <span class="detail-value text-danger fst-italic">
-                <%= employee.Password.substring(0, 15) %>... (Đã mã hóa)
+              <p class="mb-0 detail-label">Mật Khẩu (Để kiểm tra):</p>
+              <span class="detail-value fst-italic">
+                <%= employee.Password.substring(0, 15) %>
               </span>
             </div>
             <% } %>
