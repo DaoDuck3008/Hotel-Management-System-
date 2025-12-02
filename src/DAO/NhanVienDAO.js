@@ -3,11 +3,13 @@ import cloudinary from "../config/cloudinary.js";
 import { Op, where } from "sequelize";
 
 class NhanVienDAO {
+  //lấy tất cả nhân viên
   static async getAll() {
     const employees = await db.NhanVien.findAll();
     return employees;
   }
 
+  //Tạo nhân viên mới
   static async create(data) {
     const transaction = await db.sequelize.transaction();
     try {
@@ -68,6 +70,7 @@ class NhanVienDAO {
     }
   }
 
+  //Cập nhật nhân viên
   static async update(data, MaNV) {
     await db.NhanVien.update(
       {
@@ -91,6 +94,23 @@ class NhanVienDAO {
       success: true,
       message: "Tạo nhân viên thành công",
     };
+  }
+
+  static async search(searchData) {
+    try {
+      const whereNhanVien = await db.NhanVien.findAll({
+        where: {
+          [Op.or]: [
+            { MaNV: { [Op.like]: `%${searchData}%` } },
+            { HoTen: { [Op.like]: `%${searchData}%` } },
+          ],
+        },
+      });
+      return whereNhanVien;
+    } catch (error) {
+      console.log("Error in NhanVienDAO:", error);
+      throw error;
+    }
   }
 }
 module.exports = NhanVienDAO;

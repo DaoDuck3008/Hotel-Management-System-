@@ -24,13 +24,14 @@ const initWebRoutes = (app) => {
   router.get("/logout", AuthController.logout);
 
   // ======= Nhan Vien routes =========
-  router.get("/employees", NhanVienController.index);
-  router.get("/employees/create", NhanVienController.create);
-  router.post("/employees", upload.single("image"), NhanVienController.store);
-  router.post("/employees/update/:MaNV", NhanVienController.update);
-
-  router.get("/employees/delete/:MaNV", NhanVienController.destroy);
-  router.get("/employees/edit/:MaNV", NhanVienController.edit);
+  router.get("/employees", NhanVienController.index); //Lấy danh sách nhân viên
+  router.get("/employees/create", NhanVienController.create); //Trang tạo nhân viên
+  router.post("/employees", upload.single("image"), NhanVienController.store); //Lưu nhân viên mới
+  router.get("/employees/:MaNV", NhanVienController.detail); //Chi tiết nhân viên
+  router.get("/employees/edit/:MaNV", NhanVienController.edit); //Trang chỉnh sửa nhân viên
+  router.post("/employees/update/:MaNV", NhanVienController.update); //Cập nhật nhân viên
+  router.get("/employees/search", NhanVienController.search); //Tìm kiếm nhân viên
+  router.get("/employees/delete/:MaNV", NhanVienController.destroy); //Xóa nhân viên
   //  ===== Phong routes =====
   router.get(
     "/rooms",
