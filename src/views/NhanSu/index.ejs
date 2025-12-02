@@ -157,14 +157,21 @@
           <div
             class="d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded"
           >
-            <h2 class="h3 mb-0 fw-bold">Quản lý Nhân viên</h2>
+            <h2 class="h3 mb-0 fw-bold">
+              <a class="text-decoration-none" href="/employees"
+                >Quản lý Nhân viên</a
+              >
+            </h2>
             <div class="d-flex align-items-center">
-              <input
-                type="text"
-                class="form-control me-2"
-                placeholder="Tìm kiếm nhân viên..."
-              />
-              <button class="btn btn-primary" type="button">Tìm kiếm</button>
+              <form action="/employees/search" method="GET">
+                <input
+                  name="searchData"
+                  type="text"
+                  class="form-control me-2"
+                  placeholder="Tìm kiếm nhân viên..."
+                />
+                <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+              </form>
             </div>
           </div>
 
@@ -226,7 +233,7 @@
                       </td>
                       <td>
                         <a
-                          href="/employees/view/<%= nhanvien.MaNV %>"
+                          href="/employees/<%= nhanvien.MaNV %>"
                           class="text-primary me-2"
                           >Xem</a
                         >

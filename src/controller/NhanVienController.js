@@ -2,11 +2,13 @@ import NhanVienDAO from "../DAO/NhanVienDAO";
 import db from "../models/index";
 import ExcelJS from "exceljs";
 
+//Hiển thị danh sách nhân viên
 const index = async (req, res) => {
   const employees = await NhanVienDAO.getAll();
   return res.render("NhanSu/index.ejs", { employees });
 };
 
+//Mở form tạo nhân viên mới
 const create = async (req, res) => {
   // const MaNV = req.body.MaNV;
   // const HoTen = req.body.HoTen;
@@ -20,6 +22,7 @@ const create = async (req, res) => {
   return res.render("NhanSu/create.ejs");
 };
 
+//Lưu nhân viên mới
 const store = async (req, res) => {
   const result = await NhanVienDAO.create(req.body, req.file);
 
@@ -30,6 +33,18 @@ const store = async (req, res) => {
   return res.redirect("/employees");
 };
 
+const detail = async (req, res) => {
+  try {
+    const { MaNV } = req.params;
+    const employee = await NhanVienDAO.getById(MaNV);
+    return res.render("NhanSu/detail.ejs", { employee: employee });
+  } catch (error) {
+    console.error("Error in NhanVienController: ", error);
+    return res.redirect("/employees");
+  }
+};
+
+//Mmowr form chỉnh sửa nhân viên
 const edit = async (req, res) => {
   const { MaNV } = req.params;
   const employee = await NhanVienDAO.getById(MaNV);
@@ -43,6 +58,7 @@ const edit = async (req, res) => {
   return res.render("NhanSu/edit.ejs", { employee });
 };
 
+//Chỉnh sửa nhân viên
 const update = async (req, res) => {
   try {
     console.log("Update NhanVien with data:", req.file);
@@ -61,6 +77,7 @@ const update = async (req, res) => {
   }
 };
 
+//Xóa nhân viên
 const destroy = async (req, res) => {
   try {
     const { MaNV } = req.params;
@@ -92,7 +109,18 @@ const destroy = async (req, res) => {
   }
 };
 
-// const search = async (req, res) => {};
+//Tìm kiếm
+const search = async (req, res) => {
+  try {
+    const { searchData } = req.query;
+    console.log("SearchData: ", searchData);
+    const employees = await NhanVienDAO.search(searchData);
+    return res.render("NhanSu/index.ejs", { employees });
+  } catch (error) {
+    console.error("Error in NhanVienController: ", error);
+    return res.redirect("/employees");
+  }
+};
 
 // const statistics = async (req, res) => {};
 
@@ -103,9 +131,10 @@ module.exports = {
   edit,
   update,
   destroy,
+  detail,
   index,
   store,
-  //   search,
+  search,
   //   statistics,
   //   exportExcel,
 };

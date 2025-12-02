@@ -46,6 +46,11 @@ const initWebRoutes = (app) => {
     upload.single("image"),
     NhanVienController.update
   );
+  router.get(
+    "/employees/:MaNV",
+    checkPermission(["NhanSu"]),
+    NhanVienController.detail
+  ); //Chi tiết nhân viên
 
   router.get(
     "/employees/delete/:MaNV",

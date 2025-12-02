@@ -3,6 +3,7 @@ import { Op, where } from "sequelize";
 import uploadBufferToCloudinary from "../utils/uploadBufferToCloudinary.js";
 
 class NhanVienDAO {
+  //lấy tất cả nhân viên
   static async getAll() {
     const employees = await db.NhanVien.findAll();
     return employees;
@@ -137,6 +138,23 @@ class NhanVienDAO {
       };
     } catch (error) {
       console.error("Error updating employee in NhanVienDAO:", error);
+      throw error;
+    }
+  }
+
+  static async search(searchData) {
+    try {
+      const whereNhanVien = await db.NhanVien.findAll({
+        where: {
+          [Op.or]: [
+            { MaNV: { [Op.like]: `%${searchData}%` } },
+            { HoTen: { [Op.like]: `%${searchData}%` } },
+          ],
+        },
+      });
+      return whereNhanVien;
+    } catch (error) {
+      console.log("Error in NhanVienDAO:", error);
       throw error;
     }
   }
