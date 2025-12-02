@@ -1,6 +1,5 @@
 module.exports = function checkPermission(requiredPermission) {
   return (req, res, next) => {
-    console.log("req.session.user:", req.session);
     const user = req.session.user;
 
     if (!user) {

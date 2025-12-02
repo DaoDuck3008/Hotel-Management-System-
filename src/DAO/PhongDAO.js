@@ -1,6 +1,7 @@
 import db from "../models/index.js";
 import cloudinary from "../config/cloudinary.js";
 import { Op, where } from "sequelize";
+import RoomDetailDTO from "../DTO/Phong/RoomDetailDTO.js";
 
 class PhongDAO {
   // Lấy tất cả phòng
@@ -10,13 +11,13 @@ class PhongDAO {
       const rooms = await db.Phong.findAll({
         include: [
           { model: db.LoaiPhong, as: "LoaiPhong" },
-          { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
+          // { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
           { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
           { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
           { model: db.HinhAnh, as: "HinhAnh" },
         ],
       });
-      return rooms;
+      return rooms.map((room) => new RoomDetailDTO(room));
     } catch (error) {
       console.error("Error fetching rooms:", error);
       throw error;
@@ -162,7 +163,7 @@ class PhongDAO {
         where: { MaPhong: maPhong },
         include: [
           { model: db.LoaiPhong, as: "LoaiPhong" },
-          { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
+          // { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
           { model: db.HinhAnh, as: "HinhAnh" },
           { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
           { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
@@ -173,7 +174,9 @@ class PhongDAO {
           },
         ],
       });
-      return room;
+
+      if (!room) return null;
+      return new RoomDetailDTO(room);
     } catch (error) {
       console.error("Error fetching room by ID in PhongDAO:", error);
       throw error;

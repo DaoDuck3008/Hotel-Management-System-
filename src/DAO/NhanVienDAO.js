@@ -1,6 +1,6 @@
 import db from "../models/index.js";
-import cloudinary from "../config/cloudinary.js";
 import { Op, where } from "sequelize";
+import uploadBufferToCloudinary from "../utils/uploadBufferToCloudinary.js";
 
 class NhanVienDAO {
   //lấy tất cả nhân viên
@@ -9,24 +9,38 @@ class NhanVienDAO {
     return employees;
   }
 
-  //Tạo nhân viên mới
-  static async create(data) {
+  static async create(data, file) {
     const transaction = await db.sequelize.transaction();
     try {
-      const newEmployee = await db.NhanVien.create({
-        MaNV: data.MaNV,
-        HoTen: data.HoTen,
-        NgayVaoLam: data.NgayVaoLam,
-        NgaySinh: data.NgaySinh,
-        PhongBan: data.PhongBan,
-        SDT: data.SDT,
-        Email: data.Email,
-        ImgURL: data.image,
-        TrangThai: data.TrangThai,
-        Password: data.Password,
-        GioiTinh: data.GioiTinh,
-      });
+      // Upload hình ảnh lên Cloudinary nếu có file
+      let imgUrl = null;
 
+      if (file) {
+        const upload = await uploadBufferToCloudinary(
+          file.buffer,
+          "hotel/NhanVien"
+        );
+        imgUrl = upload;
+      }
+
+      await db.NhanVien.create(
+        {
+          MaNV: data.MaNV,
+          HoTen: data.HoTen,
+          NgayVaoLam: data.NgayVaoLam,
+          NgaySinh: data.NgaySinh,
+          PhongBan: data.PhongBan,
+          SDT: data.SDT,
+          Email: data.Email,
+          ImgURL: imgUrl || null,
+          TrangThai: data.TrangThai,
+          Password: data.Password,
+          GioiTinh: data.GioiTinh,
+        },
+        { transaction }
+      );
+
+      await transaction.commit();
       return {
         success: true,
         message: "Tạo nhân viên thành công",
@@ -70,30 +84,62 @@ class NhanVienDAO {
     }
   }
 
-  //Cập nhật nhân viên
-  static async update(data, MaNV) {
-    await db.NhanVien.update(
-      {
-        HoTen: data.HoTen,
-        NgayVaoLam: data.NgayVaoLam,
-        NgaySinh: data.NgaySinh,
-        PhongBan: data.PhongBan,
-        SDT: data.SDT,
-        Email: data.Email,
-        TrangThai: data.TrangThai,
-        Password: data.Password,
-        GioiTinh: data.GioiTinh,
-      },
-      {
-        where: {
-          MaNV: MaNV,
+  static async update(data, file, MaNV) {
+    const transaction = await db.sequelize.transaction();
+    try {
+      await db.NhanVien.update(
+        {
+          HoTen: data.HoTen,
+          NgayVaoLam: data.NgayVaoLam,
+          NgaySinh: data.NgaySinh,
+          PhongBan: data.PhongBan,
+          SDT: data.SDT,
+          Email: data.Email,
+          TrangThai: data.TrangThai,
+          Password: data.Password,
+          GioiTinh: data.GioiTinh,
+          DiaChi: data.DiaChi,
         },
+        {
+          where: {
+            MaNV: MaNV,
+          },
+        },
+        { transaction }
+      );
+
+      let imgUrl = null;
+
+      if (file) {
+        const upload = await uploadBufferToCloudinary(
+          file.buffer,
+          "hotel/NhanVien"
+        );
+        imgUrl = upload;
       }
-    );
-    return {
-      success: true,
-      message: "Tạo nhân viên thành công",
-    };
+
+      // Nếu có hình ảnh mới, cập nhật lại trường ImgURL
+      if (imgUrl) {
+        await db.NhanVien.update(
+          {
+            ImgURL: imgUrl,
+          },
+          {
+            where: {
+              MaNV: MaNV,
+            },
+          },
+          { transaction }
+        );
+      }
+      return {
+        success: true,
+        message: "Tạo nhân viên thành công",
+      };
+    } catch (error) {
+      console.error("Error updating employee in NhanVienDAO:", error);
+      throw error;
+    }
   }
 
   static async search(searchData) {
