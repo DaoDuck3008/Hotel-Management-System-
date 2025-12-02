@@ -18,7 +18,9 @@ const login = async (req, res) => {
     const user = await db.NhanVien.findOne({ where: { Email: email } });
 
     if (!user || user.Password !== password) {
-      return res.render("login", { error: "Sai email hoặc mật khẩu!" });
+      return res.render("Auth/login.ejs", {
+        error: "Sai email hoặc mật khẩu!",
+      });
     }
 
     // 3. Lưu thông tin user vào session
@@ -54,7 +56,7 @@ const login = async (req, res) => {
   } catch (error) {
     console.error("Error during login:", error);
     req.flash("error", "Đã xảy ra lỗi trong quá trình đăng nhập.");
-    return res.render("login");
+    return res.render("Auth/login.ejs");
   }
 };
 
