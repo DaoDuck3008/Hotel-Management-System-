@@ -29,17 +29,39 @@ const initWebRoutes = (app) => {
     checkPermission(["NhanSu"]),
     NhanVienController.index
   );
-  router.get("/employees/create", NhanVienController.create);
-  router.post("/employees", upload.single("image"), NhanVienController.store);
+  router.get(
+    "/employees/create",
+    checkPermission(["NhanSu"]),
+    NhanVienController.create
+  );
+  router.post(
+    "/employees",
+    checkPermission(["NhanSu"]),
+    upload.single("image"),
+    NhanVienController.store
+  );
   router.post(
     "/employees/update/:MaNV",
+    checkPermission(["NhanSu"]),
     upload.single("image"),
     NhanVienController.update
   );
-  router.get("/employees/:MaNV", NhanVienController.detail); //Chi tiết nhân viên
+  router.get(
+    "/employees/:MaNV",
+    checkPermission(["NhanSu"]),
+    NhanVienController.detail
+  ); //Chi tiết nhân viên
 
-  router.get("/employees/delete/:MaNV", NhanVienController.destroy);
-  router.get("/employees/edit/:MaNV", NhanVienController.edit);
+  router.get(
+    "/employees/delete/:MaNV",
+    checkPermission(["NhanSu"]),
+    NhanVienController.destroy
+  );
+  router.get(
+    "/employees/edit/:MaNV",
+    checkPermission(["NhanSu"]),
+    NhanVienController.edit
+  );
 
   //  ===== Phong routes =====
   router.get(
