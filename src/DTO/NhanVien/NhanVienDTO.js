@@ -20,7 +20,7 @@ class NhanVienDTO {
     this.PhongBan = PhongBan;
     this.SDT = SDT;
     this.Email = Email;
-    this.ImgURL = ImgURL;
+    this.ImgURL = ImgURL || null;
     this.TrangThai = TrangThai;
     this.GioiTinh = GioiTinh;
     this.DiaChi = DiaChi;

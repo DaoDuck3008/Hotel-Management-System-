@@ -1,17 +1,20 @@
 import db from "../models/index.js";
 import { Op, where } from "sequelize";
 import uploadBufferToCloudinary from "../utils/uploadBufferToCloudinary.js";
+import NhanVienDTO from "../DTO/NhanVien/NhanVienDTO.js";
 
 class NhanVienDAO {
   //lấy tất cả nhân viên
   static async getAll() {
     const employees = await db.NhanVien.findAll();
-    return employees;
+    return employees.map((employee) => new NhanVienDTO(employee));
   }
 
-  static async create(data, file) {
+  static async create(employeeDTO) {
     const transaction = await db.sequelize.transaction();
     try {
+      const file = employeeDTO.ImgURL;
+
       // Upload hình ảnh lên Cloudinary nếu có file
       let imgUrl = null;
 
@@ -25,17 +28,17 @@ class NhanVienDAO {
 
       await db.NhanVien.create(
         {
-          MaNV: data.MaNV,
-          HoTen: data.HoTen,
-          NgayVaoLam: data.NgayVaoLam,
-          NgaySinh: data.NgaySinh,
-          PhongBan: data.PhongBan,
-          SDT: data.SDT,
-          Email: data.Email,
+          MaNV: employeeDTO.MaNV,
+          HoTen: employeeDTO.HoTen,
+          NgayVaoLam: employeeDTO.NgayVaoLam,
+          NgaySinh: employeeDTO.NgaySinh,
+          PhongBan: employeeDTO.PhongBan,
+          SDT: employeeDTO.SDT,
+          Email: employeeDTO.Email,
           ImgURL: imgUrl || null,
-          TrangThai: data.TrangThai,
-          Password: data.Password,
-          GioiTinh: data.GioiTinh,
+          TrangThai: employeeDTO.TrangThai,
+          Password: employeeDTO.Password,
+          GioiTinh: employeeDTO.GioiTinh,
         },
         { transaction }
       );
@@ -59,7 +62,7 @@ class NhanVienDAO {
       const employee = await db.NhanVien.findOne({
         where: { MaNV: MaNV },
       });
-      return employee;
+      return new NhanVienDTO(employee);
     } catch (error) {
       console.error("Error fetching room by ID in NhanVienDAO:", error);
       throw error;
@@ -84,21 +87,21 @@ class NhanVienDAO {
     }
   }
 
-  static async update(data, file, MaNV) {
+  static async update(employeeDTO, MaNV) {
     const transaction = await db.sequelize.transaction();
     try {
       await db.NhanVien.update(
         {
-          HoTen: data.HoTen,
-          NgayVaoLam: data.NgayVaoLam,
-          NgaySinh: data.NgaySinh,
-          PhongBan: data.PhongBan,
-          SDT: data.SDT,
-          Email: data.Email,
-          TrangThai: data.TrangThai,
-          Password: data.Password,
-          GioiTinh: data.GioiTinh,
-          DiaChi: data.DiaChi,
+          HoTen: employeeDTO.HoTen,
+          NgayVaoLam: employeeDTO.NgayVaoLam,
+          NgaySinh: employeeDTO.NgaySinh,
+          PhongBan: employeeDTO.PhongBan,
+          SDT: employeeDTO.SDT,
+          Email: employeeDTO.Email,
+          TrangThai: employeeDTO.TrangThai,
+          Password: employeeDTO.Password,
+          GioiTinh: employeeDTO.GioiTinh,
+          DiaChi: employeeDTO.DiaChi,
         },
         {
           where: {
@@ -110,6 +113,7 @@ class NhanVienDAO {
 
       let imgUrl = null;
 
+      const file = employeeDTO.ImgURL;
       if (file) {
         const upload = await uploadBufferToCloudinary(
           file.buffer,
@@ -152,7 +156,7 @@ class NhanVienDAO {
           ],
         },
       });
-      return whereNhanVien;
+      return whereNhanVien.map((employee) => new NhanVienDTO(employee));
     } catch (error) {
       console.log("Error in NhanVienDAO:", error);
       throw error;
