@@ -62,7 +62,7 @@
 
           <!-- FORM EDIT -->
           <form
-            action="/bookings/<%= booking.MaDatPhong %>/edit"
+            action="/bookings/<%= booking.DatPhong.MaDatPhong %>/edit"
             method="POST"
             class="shadow-card p-4 rounded"
           >
@@ -104,7 +104,7 @@
                     name="NgaySinh"
                     class="form-control"
                     required
-                    value="<%= booking.KhachHang.NgaySinh %>"
+                    value="<%= new Date(booking.KhachHang.NgaySinh).toISOString().slice(0,10) %>"
                   />
                 </div>
 
@@ -148,7 +148,7 @@
                     name="NgayNhanPhong"
                     class="form-control"
                     required
-                    value="<%= booking.NgayNhanPhong.toISOString().slice(0, 10) %>"
+                    value="<%= booking.DatPhong.NgayNhanPhong.toISOString().slice(0, 10) %>"
                     />
                 </div>
 
@@ -159,7 +159,7 @@
                     name="NgayTraPhong"
                     class="form-control"
                     required
-                    value="<%= booking.NgayTraPhong.toISOString().slice(0, 10) %>"
+                    value="<%= booking.DatPhong.NgayTraPhong.toISOString().slice(0, 10) %>"
                     />
                 </div>
               </div>
@@ -435,7 +435,7 @@
           rooms.push({
             MaPhong,
             LoaiGia,
-            GiaTheoNgay: giaTheoNgay,
+            ChiTietGiaDatPhong: giaTheoNgay,
           });
         });
 

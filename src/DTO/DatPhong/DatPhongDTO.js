@@ -7,54 +7,54 @@ class DatPhongDTO {
     NgayTraPhong,
     TrangThaiThanhToan,
   }) {
-    this._maDatPhong = MaDatPhong;
-    this._maKhachHang = MaKhachHang;
-    this._ngayDat = NgayDat;
-    this._ngayNhanPhong = NgayNhanPhong;
-    this._ngayTraPhong = NgayTraPhong;
-    this._trangThaiThanhToan = TrangThaiThanhToan;
+    this.MaDatPhong = MaDatPhong;
+    this.MaKhachHang = MaKhachHang;
+    this.NgayDat = NgayDat;
+    this.NgayNhanPhong = NgayNhanPhong;
+    this.NgayTraPhong = NgayTraPhong;
+    this.TrangThaiThanhToan = TrangThaiThanhToan;
   }
 
   get maDatPhong() {
-    return this._maDatPhong;
+    return this.MaDatPhong;
   }
   set maDatPhong(v) {
-    this._maDatPhong = v;
+    this.MaDatPhong = v;
   }
 
   get maKhachHang() {
-    return this._maKhachHang;
+    return this.MaKhachHang;
   }
   set maKhachHang(v) {
-    this._maKhachHang = v;
+    this.MaKhachHang = v;
   }
 
   get ngayDat() {
-    return this._ngayDat;
+    return this.NgayDat;
   }
   set ngayDat(v) {
-    this._ngayDat = v;
+    this.NgayDat = v;
   }
 
   get ngayNhanPhong() {
-    return this._ngayNhanPhong;
+    return this.NgayNhanPhong;
   }
   set ngayNhanPhong(v) {
-    this._ngayNhanPhong = v;
+    this.NgayNhanPhong = v;
   }
 
   get ngayTraPhong() {
-    return this._ngayTraPhong;
+    return this.NgayTraPhong;
   }
   set ngayTraPhong(v) {
-    this._ngayTraPhong = v;
+    this.NgayTraPhong = v;
   }
 
   get trangThaiThanhToan() {
-    return this._trangThaiThanhToan;
+    return this.TrangThaiThanhToan;
   }
   set trangThaiThanhToan(v) {
-    this._trangThaiThanhToan = v;
+    this.TrangThaiThanhToan = v;
   }
 }
 

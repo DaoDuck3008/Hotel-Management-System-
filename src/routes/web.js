@@ -96,7 +96,7 @@ const initWebRoutes = (app) => {
   ); // Trang tạo phòng
   router.post(
     "/rooms",
-    // checkPermission(["Phong"]),
+    checkPermission(["Phong"]),
     upload.array("HinhAnh", 20),
     PhongController.store
   ); // Lưu phòng mới

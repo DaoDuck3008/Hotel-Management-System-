@@ -1,5 +1,6 @@
 import db from "../models/index.js";
 import { Op } from "sequelize";
+import BookingDetailDTO from "../DTO/DatPhong/BookingDetailDTO";
 
 class DatPhongDAO {
   // Lấy tất cả phòng với trạng thái hiện tại
@@ -124,7 +125,6 @@ class DatPhongDAO {
           {
             model: db.KhachHang,
             as: "KhachHang",
-            attributes: ["MaKhachHang", "HoVaTen", "SDT", "Email", "GioiTinh"],
           },
           {
             model: db.ChiTietDatPhong,
@@ -144,7 +144,7 @@ class DatPhongDAO {
         ],
       });
 
-      return booking;
+      return new BookingDetailDTO(booking);
     } catch (error) {
       console.error("Error fetching booking by ID:", error);
       throw error;
@@ -158,14 +158,6 @@ class DatPhongDAO {
           {
             model: db.KhachHang,
             as: "KhachHang",
-            attributes: [
-              "MaKhachHang",
-              "HoVaTen",
-              "SDT",
-              "Email",
-              "GioiTinh",
-              "NgaySinh",
-            ],
           },
           {
             model: db.ChiTietDatPhong,
@@ -173,28 +165,14 @@ class DatPhongDAO {
             include: [
               {
                 model: db.Phong,
-
-                include: [
-                  { model: db.LoaiPhong, as: "LoaiPhong" },
-                  {
-                    model: db.TrangThaiPhong,
-                    as: "TrangThaiPhong",
-                    separate: true,
-                    order: [["ThoiGianCapNhat", "DESC"]],
-                    limit: 1,
-                  },
-                ],
+              },
+              {
+                model: db.ChiTietGiaDatPhong,
+                as: "ChiTietGiaDatPhong",
               },
             ],
             order: [["NgayDat", "DESC"]],
           },
-        ],
-        attributes: [
-          "MaDatPhong",
-          "MaKhachHang",
-          "NgayDat",
-          "NgayNhanPhong",
-          "NgayTraPhong",
         ],
       });
       return bookings;
@@ -204,21 +182,10 @@ class DatPhongDAO {
     }
   }
 
-  static async createBooking(bookingData) {
+  static async createBooking(bookingDTO) {
     const t = await db.sequelize.transaction();
     try {
-      const {
-        HoVaTen,
-        GioiTinh,
-        NgaySinh,
-        SDT,
-        Email,
-        NgayNhanPhong,
-        NgayTraPhong,
-        rooms,
-      } = bookingData;
-
-      const roomsArray = JSON.parse(rooms);
+      const { DatPhong, KhachHang, ChiTiet } = bookingDTO;
 
       // 1. Tạo khách hàng mới
       const lastCustomer = await db.KhachHang.findOne({
@@ -238,6 +205,7 @@ class DatPhongDAO {
         .toString()
         .padStart(3, "0")}`;
 
+      const { HoVaTen, GioiTinh, NgaySinh, SDT, Email } = KhachHang;
       const newCustomer = await db.KhachHang.create(
         {
           MaKhachHang: newMaKhachHang,
@@ -253,6 +221,7 @@ class DatPhongDAO {
       // 2. Tạo đơn đặt phòng
       const now = new Date();
       const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+      const { NgayNhanPhong, NgayTraPhong } = DatPhong;
       const newBooking = await db.DatPhong.create(
         {
           MaKhachHang: newCustomer.MaKhachHang,
@@ -264,7 +233,7 @@ class DatPhongDAO {
       );
 
       // 3. Tạo chi tiết đặt phòng
-      for (const room of roomsArray) {
+      for (const room of ChiTiet) {
         const datPhongCT = await db.ChiTietDatPhong.create(
           {
             MaDatPhong: newBooking.MaDatPhong,
@@ -274,7 +243,7 @@ class DatPhongDAO {
         );
 
         // 4. Tạo chi tiết giá đặt phòng
-        for (const priceDetail of room.GiaTheoNgay) {
+        for (const priceDetail of room.ChiTietGiaDatPhong) {
           await db.ChiTietGiaDatPhong.create(
             {
               MaCTDatPhong: datPhongCT.MaCTDatPhong,
@@ -388,21 +357,10 @@ class DatPhongDAO {
   }
 
   //Cập nhật edit vào db
-  static async updateBooking(maDatPhong, bookingData) {
+  static async updateBooking(maDatPhong, bookingDTO) {
     const t = await db.sequelize.transaction();
     try {
-      const {
-        HoVaTen,
-        GioiTinh,
-        NgaySinh,
-        SDT,
-        Email,
-        NgayNhanPhong,
-        NgayTraPhong,
-        rooms,
-      } = bookingData;
-
-      const roomsArray = JSON.parse(rooms);
+      const { DatPhong, KhachHang, ChiTiet } = bookingDTO;
 
       // 1. Lấy thông tin booking cũ
       const booking = await db.DatPhong.findOne({
@@ -415,6 +373,7 @@ class DatPhongDAO {
       }
 
       // 2. Update khách hàng (không tạo mới)
+      const { HoVaTen, GioiTinh, NgaySinh, SDT, Email } = KhachHang;
       await db.KhachHang.update(
         {
           HoVaTen,
@@ -430,6 +389,7 @@ class DatPhongDAO {
       );
 
       // 3. Update thông tin đặt phòng
+      const { NgayNhanPhong, NgayTraPhong } = DatPhong;
       await db.DatPhong.update(
         {
           NgayNhanPhong,
@@ -462,7 +422,7 @@ class DatPhongDAO {
       });
 
       // 5. TẠO LẠI CHI TIẾT ĐẶT PHÒNG + GIÁ THEO NGÀY MỚI
-      for (const room of roomsArray) {
+      for (const room of ChiTiet) {
         const newCT = await db.ChiTietDatPhong.create(
           {
             MaDatPhong: maDatPhong,
@@ -471,7 +431,7 @@ class DatPhongDAO {
           { transaction: t }
         );
 
-        for (const priceDetail of room.GiaTheoNgay) {
+        for (const priceDetail of room.ChiTietGiaDatPhong) {
           await db.ChiTietGiaDatPhong.create(
             {
               MaCTDatPhong: newCT.MaCTDatPhong,

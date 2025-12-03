@@ -14,6 +14,7 @@ class DatPhong extends Model {
         NgayDat: { type: DataTypes.DATE, allowNull: false },
         NgayNhanPhong: { type: DataTypes.DATE, allowNull: false },
         NgayTraPhong: { type: DataTypes.DATE, allowNull: false },
+        TrangThaiThanhToan: { type: DataTypes.STRING(20), allowNull: true },
       },
       { sequelize, tableName: "DatPhong", timestamps: false }
     );

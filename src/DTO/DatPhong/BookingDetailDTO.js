@@ -1,52 +1,55 @@
 const DatPhongDTO = require("./DatPhongDTO");
 const ChiTietDatPhongDTO = require("./ChiTietDatPhongDTO");
 const ChiTietGiaDatPhongDTO = require("./ChiTietGiaDatPhongDTO");
-const KhachHangDTO = require("../khachhang/KhachHangDTO");
-const PhongDTO = require("../phong/PhongDTO");
-// Nếu muốn có full detail phòng thì dùng RoomDetailDTO thay thế PhongDTO
+const KhachHangDTO = require("./KhachHangDTO");
+const RoomDetailDTO = require("../Phong/RoomDetailDTO");
 
-class DatPhongDetailDTO {
+class BookingDetailDTO {
   constructor(raw) {
-    // raw = kết quả từ Sequelize query include
-
     // -------- Đặt phòng --------
-    this._datPhong = new DatPhongDTO(raw);
+    this.DatPhong = new DatPhongDTO(raw);
 
     // -------- Khách hàng --------
-    this._khachHang = raw.khachhang ? new KhachHangDTO(raw.khachhang) : null;
+    this.KhachHang = raw.KhachHang ? new KhachHangDTO(raw.KhachHang) : raw;
 
-    // -------- Danh sách phòng đã đặt --------
-    this._danhSachPhong = Array.isArray(raw.chitietdatphongs)
-      ? raw.chitietdatphongs.map((ct) => {
-          const ctDTO = new ChiTietDatPhongDTO(ct);
-          // include phòng
-          if (ct.phong) ctDTO.phong = new PhongDTO(ct.phong);
-          return ctDTO;
-        })
-      : [];
-
-    // -------- Chi tiết giá theo ngày --------
-    this._chiTietGiaTheoNgay = Array.isArray(raw.chitietgiadatrophongs)
-      ? raw.chitietgiadatrophongs.map((g) => new ChiTietGiaDatPhongDTO(g))
-      : [];
+    // // -------- Danh sách phòng đã đặt --------
+    this.ChiTiet =
+      raw.ChiTiet?.map((ct) => {
+        const ctDTO = new ChiTietDatPhongDTO(ct);
+        // include phòng
+        if (ct.Phong) ctDTO.Phong = new RoomDetailDTO(ct.Phong);
+        return ctDTO;
+      }) || [];
   }
 
-  // === GETTERS ===
+  get chiTiet() {
+    return this.ChiTiet;
+  }
+
+  set chiTiet(rooms) {
+    this.ChiTiet = rooms.map(
+      (room) =>
+        new ChiTietDatPhongDTO({
+          MaCTDatPhong: null,
+          MaDatPhong: null,
+          MaPhong: room.MaPhong,
+          Phong: null,
+          ChiTietGiaDatPhong: room.ChiTietGiaDatPhong,
+        })
+    );
+  }
+
   get datPhong() {
-    return this._datPhong;
+    return this.DatPhong;
   }
 
   get khachHang() {
-    return this._khachHang;
-  }
-
-  get danhSachPhong() {
-    return this._danhSachPhong;
+    return this.KhachHang;
   }
 
   get chiTietGiaTheoNgay() {
-    return this._chiTietGiaTheoNgay;
+    return this.ChiTietGiaDatPhong;
   }
 }
 
-module.exports = DatPhongDetailDTO;
+module.exports = BookingDetailDTO;

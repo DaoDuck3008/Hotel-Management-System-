@@ -1,29 +1,37 @@
+const RoomDetailDTO = require("../Phong/RoomDetailDTO");
+const ChiTietGiaDatPhongDTO = require("./ChiTietGiaDatPhongDTO");
+
 class ChiTietDatPhongDTO {
-  constructor({ MaCTDatPhong, MaDatPhong, MaPhong }) {
-    this._maCTDatPhong = MaCTDatPhong;
-    this._maDatPhong = MaDatPhong;
-    this._maPhong = MaPhong;
+  constructor(ChiTiet) {
+    this.MaCTDatPhong = ChiTiet.MaCTDatPhong;
+    this.MaDatPhong = ChiTiet.MaDatPhong;
+    this.MaPhong = ChiTiet.MaPhong;
+
+    this.Phong = new RoomDetailDTO(ChiTiet.Phong);
+    this.ChiTietGiaDatPhong = ChiTiet.ChiTietGiaDatPhong.map(
+      (c) => new ChiTietGiaDatPhongDTO(c)
+    );
   }
 
   get maCTDatPhong() {
-    return this._maCTDatPhong;
+    return this.MaCTDatPhong;
   }
   set maCTDatPhong(v) {
-    this._maCTDatPhong = v;
+    this.MaCTDatPhong = v;
   }
 
   get maDatPhong() {
-    return this._maDatPhong;
+    return this.MaDatPhong;
   }
   set maDatPhong(v) {
-    this._maDatPhong = v;
+    this.MaDatPhong = v;
   }
 
   get maPhong() {
-    return this._maPhong;
+    return this.MaPhong;
   }
   set maPhong(v) {
-    this._maPhong = v;
+    this.MaPhong = v;
   }
 }
 
