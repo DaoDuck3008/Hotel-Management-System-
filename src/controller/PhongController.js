@@ -2,6 +2,7 @@ import PhongDao from "../DAO/PhongDAO.js";
 import db from "../models/index.js";
 import { createRoomSchema } from "../validators/PhongValidator.js";
 import ExcelJS from "exceljs";
+import RoomDetailDTO from "../DTO/Phong/RoomDetailDTO.js";
 
 // Hiển thị danh sách phòng
 const index = async (req, res) => {
@@ -36,7 +37,12 @@ const store = async (req, res) => {
       return res.redirect("/rooms/create");
     }
 
-    const result = await PhongDao.create(req.body, req.files); // gọi DAO để tạo phòng mới
+    // tạo đối tượng phòng mới và lưu các trường thông tin
+    let roomDTO = new RoomDetailDTO(req.body);
+    roomDTO.TienIch = req.body.TienIch;
+    roomDTO.HinhAnh = req.files;
+
+    const result = await PhongDao.create(roomDTO); // gọi DAO để tạo phòng mới
 
     // Kiểm tra kết quả trả về từ DAO
     if (!result.success) {
@@ -48,6 +54,7 @@ const store = async (req, res) => {
     return res.redirect("/rooms");
   } catch (error) {
     console.error("Error in store roomController:", error);
+    req.flash("error", "Đã xảy ra lỗi!");
     return res.redirect("/rooms/create");
   }
 };
@@ -81,15 +88,6 @@ const edit = async (req, res) => {
 // Chỉnh sửa phòng
 const update = async (req, res) => {
   try {
-    // Kiểm tra phòng tồn tại trước
-    const { maPhong } = req.params;
-    const room = await PhongDao.getById(maPhong);
-
-    if (!room) {
-      req.flash("error", "Phòng không tồn tại!");
-      return res.redirect("/rooms");
-    }
-
     // Gọi validator để kiểm tra dữ liệu đầu vào
     const { error } = createRoomSchema.validate(req.body, {
       abortEarly: false,
@@ -104,7 +102,13 @@ const update = async (req, res) => {
       return res.redirect("/rooms/" + maPhong + "/edit");
     }
 
-    const result = await PhongDao.update(maPhong, req.body, req.files); // Gọi DAO để cập nhật phòng
+    // Tạo đối tượng
+    let updatedRoomDTO = new RoomDetailDTO(req.body);
+    updatedRoomDTO.TienIch = req.body.TienIch;
+    updatedRoomDTO.HinhAnh = req.files;
+    const deletedImages = req.body.DeletedImages;
+
+    const result = await PhongDao.update(updatedRoomDTO, deletedImages); // Gọi DAO để cập nhật phòng
 
     // Kiểm tra kết quả trả về từ DAO
     if (!result.success) {
@@ -112,9 +116,11 @@ const update = async (req, res) => {
       return res.redirect("/rooms");
     }
 
+    req.flash("success", "Cập nhật thành công!");
     return res.redirect("/rooms");
   } catch (error) {
     console.error("Error in update PhongController:", error);
+    req.flash("error", "Đã xảy ra lỗi!");
     return res.redirect("/rooms");
   }
 };

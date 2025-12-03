@@ -11,12 +11,14 @@ class RoomDetailDTO {
     this.TenPhong = room.TenPhong;
     this.SucChua = room.SucChua;
     this.SoGiuong = room.SoGiuong;
-    this.GiaNgayCoBan = room.GiaNgayCB;
-    this.GiaGioCoBan = room.GiaGioCB;
+    this.GiaNgayCB = room.GiaNgayCB;
+    this.GiaGioCB = room.GiaGioCB;
     this.MoTa = room.MoTa;
 
     // Quan hệ 1-1
-    this.LoaiPhong = room.LoaiPhong ? new LoaiPhongDTO(room.LoaiPhong) : null;
+    this.LoaiPhong = room.TenLoaiPhong
+      ? new LoaiPhongDTO({ TenLoaiPhong: room.TenLoaiPhong, MoTa: null })
+      : null;
 
     // Quan hệ 1-n
     this.TrangThaiPhong =
@@ -27,6 +29,53 @@ class RoomDetailDTO {
     this.GiaPhongNgayLe =
       room.GiaPhongNgayLe?.map((g) => new GiaPhongNgayLeDTO(g)) || [];
     this.TienIch = room.TienIch?.map((t) => new TienIchDTO(t)) || [];
+  }
+
+  get tienIch() {
+    return this.TienIch;
+  }
+
+  set tienIch(TienIch) {
+    this.TienIch = TienIch?.map((t) => {
+      new TienIchDTO({
+        MaTienIch: t,
+        TenTienIch: null,
+        IconURL: null,
+        MoTa: null,
+      });
+    });
+  }
+
+  get hinhAnh() {
+    return this.HinhAnh;
+  }
+
+  set hinhAnh(HinhAnh) {
+    this.HinhAnh =
+      HinhAnh?.map(
+        (h) =>
+          new HinhAnhDTO({
+            MaHinhAnh: null,
+            ImgURL: h,
+          })
+      ) || [];
+  }
+
+  get giaPhongTuan() {
+    return this.GiaPhongTuan;
+  }
+
+  set giaPhongTuan(GiaPhongTuan) {
+    this.GiaPhongTuan = GiaPhongTuan?.map((g) => new GiaPhongTuanDTO(g)) || [];
+  }
+
+  get giaPhongNgayLe() {
+    return this.GiaPhongTuan;
+  }
+
+  set giaPhongNgayLe(GiaPhongNgayLe) {
+    this.GiaPhongNgayLe =
+      GiaPhongNgayLe?.map((g) => new GiaPhongNgayLeDTO(g)) || [];
   }
 
   get maPhong() {
@@ -42,10 +91,10 @@ class RoomDetailDTO {
     return this.SoGiuong;
   }
   get giaNgayCoBan() {
-    return this.GiaNgayCoBan;
+    return this.GiaNgayCB;
   }
   get giaGioCoBan() {
-    return this.GiaGioCoBan;
+    return this.GiaGioCB;
   }
   get moTa() {
     return this.MoTa;

@@ -138,7 +138,7 @@
                     type="text"
                     class="form-control"
                     id="maPhong"
-                    name="maPhong"
+                    name="MaPhong"
                     placeholder="VD: P101"
                     value="<%= room.MaPhong %>"
                     required
@@ -155,7 +155,7 @@
                     type="text"
                     class="form-control"
                     id="tenPhong"
-                    name="tenPhong"
+                    name="TenPhong"
                     placeholder="VD: Deluxury Ocean View"
                     value="<%= room.TenPhong %>"
                     required
@@ -167,14 +167,14 @@
                   <select
                     class="form-select"
                     id="loaiPhong"
-                    name="loaiPhong"
+                    name="TenLoaiPhong"
                     required
                   >
                     <option value="">Chọn loại phòng</option>
                     <% if(roomTypes && roomTypes.length > 0) {
                       roomTypes.forEach((roomType) => { %>
                         <option value="<%= roomType.TenLoaiPhong %>"
-                          <%= roomType.TenLoaiPhong === room.TenLoaiPhong ? 'selected' : '' %>>
+                          <%= roomType.TenLoaiPhong === room.LoaiPhong.TenLoaiPhong ? 'selected' : '' %>>
                           <%= roomType.TenLoaiPhong %>
                         </option>
                     <% }) } %>
@@ -183,15 +183,13 @@
 
                 <div class="col-md-6">
                   <label for="trangThai" class="form-label required">Trạng thái</label>
-                  <select
-                    class="form-select"
+                  <input
+                    class="form-control"
                     id="trangThai"
-                    name="trangThai"
+                    name="TrangThai"
+                    value="<%= room.getCurrentTrangThai() %>"
                     disabled
-                  >
-                    <option value="Empty" <%= (room.TrangThaiPhong && room.TrangThaiPhong.length && room.TrangThaiPhong[0].TrangThai === 'Empty') ? `Empty` : `` %>>Trống</option>
-                    <!-- trạng thái này hiển thị nhưng không edit trực tiếp ở đây -->
-                  </select>
+                  />
                 </div>
 
                 <div class="col-md-6">
@@ -200,7 +198,7 @@
                     type="number"
                     class="form-control"
                     id="soGiuong"
-                    name="soGiuong"
+                    name="SoGiuong"
                     min="1"
                     value="<%= room.SoGiuong ? room.SoGiuong : 1 %>"
                     required
@@ -214,7 +212,7 @@
                     type="number"
                     class="form-control"
                     id="sucChua"
-                    name="sucChua"
+                    name="SucChua"
                     min="1"
                     value="<%= room.SucChua ? room.SucChua : 1 %>"
                     required
@@ -227,7 +225,7 @@
                   <textarea
                     class="form-control"
                     id="moTa"
-                    name="moTa"
+                    name="MoTa"
                     rows="3"
                     placeholder="Mô tả chi tiết về phòng..."
                   ><%= room.MoTa ? room.MoTa : '' %></textarea>
@@ -251,7 +249,7 @@
                     type="number"
                     class="form-control"
                     id="giaTheoNgay"
-                    name="giaTheoNgay"
+                    name="GiaNgayCB"
                     placeholder="VD: 2500000"
                     min="0"
                     value="<%= room.GiaNgayCB %>"
@@ -266,7 +264,7 @@
                     type="number"
                     class="form-control"
                     id="giaTheoGio"
-                    name="giaTheoGio"
+                    name="GiaGioCB"
                     placeholder="VD: 500000"
                     min="0"
                     value="<%= room.GiaGioCB %>"
@@ -299,11 +297,11 @@
                 <div class="col-md-6">
                   <label class="form-label"><%= label %></label>
                   <div class="input-group">
-                    <input type="hidden" name="giaThu[<%= thu %>][thu]" value="<%= thu %>" />
+                    <input type="hidden" name="GiaPhongTuan[<%= thu %>][ThuApDung]" value="<%= thu %>" />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[<%= thu %>][giaNgay]"
+                      name="GiaPhongTuan[<%= thu %>][GiaNgay]"
                       placeholder="Giá theo ngày"
                       min="0"
                       value="<%= item ? item.GiaNgay : '' %>"
@@ -311,7 +309,7 @@
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[<%= thu %>][giaGio]"
+                      name="GiaPhongTuan[<%= thu %>][GiaGio]"
                       placeholder="Giá theo giờ"
                       min="0"
                       value="<%= item ? item.GiaGio : '' %>"
@@ -350,27 +348,27 @@
                     <div class="row g-3">
                       <div class="col-md-4">
                         <label class="form-label required">Tên ngày lễ</label>
-                        <input type="text" class="form-control" name="giaLe[<%= i+1 %>][ten]" required value="<%= le.NgayLe  %>">
+                        <input type="text" class="form-control" name="GiaPhongNgayLe[<%= i+1 %>][NgayLe]" required value="<%= le.NgayLe  %>">
                       </div>
 
                       <div class="col-md-4">
                         <label class="form-label required">Ngày bắt đầu</label>
-                        <input type="date" class="form-control" name="giaLe[<%= i+1 %>][start]" required value="<%= le.NgayBatDau ? new Date(le.NgayBatDau).toISOString().slice(0,10) : '' %>">
+                        <input type="date" class="form-control" name="GiaPhongNgayLe[<%= i+1 %>][NgayBatDau]" required value="<%= le.NgayBatDau ? new Date(le.NgayBatDau).toISOString().slice(0,10) : '' %>">
                       </div>
 
                       <div class="col-md-4">
                         <label class="form-label required">Ngày kết thúc</label>
-                        <input type="date" class="form-control" name="giaLe[<%= i+1 %>][end]" required value="<%= le.NgayKetThuc ? new Date(le.NgayKetThuc).toISOString().slice(0,10) : '' %>">
+                        <input type="date" class="form-control" name="GiaPhongNgayLe[<%= i+1 %>][NgayKetThuc]" required value="<%= le.NgayKetThuc ? new Date(le.NgayKetThuc).toISOString().slice(0,10) : '' %>">
                       </div>
 
                       <div class="col-md-6">
                         <label class="form-label required">Giá ngày (VNĐ)</label>
-                        <input type="number" class="form-control" name="giaLe[<%= i+1 %>][giaNgay]" required min="0" value="<%= le.GiaNgay %>">
+                        <input type="number" class="form-control" name="GiaPhongNgayLe[<%= i+1 %>][GiaNgay]" required min="0" value="<%= le.GiaNgay %>">
                       </div>
 
                       <div class="col-md-6">
                         <label class="form-label">Giá giờ (VNĐ)</label>
-                        <input type="number" class="form-control" name="giaLe[<%= i+1 %>][giaGio]" min="0" value="<%= le.GiaGio  %>">
+                        <input type="number" class="form-control" name="GiaPhongNgayLe[<%= i+1 %>][GiaGio]" min="0" value="<%= le.GiaGio  %>">
                       </div>
                     </div>
                   </div>
@@ -412,7 +410,7 @@
               <input
                 type="file"
                 id="imageInput"
-                name="images"
+                name="HinhAnh"
                 multiple
                 accept="image/*"
                 class="d-none"
@@ -438,7 +436,7 @@
                             id="amenity-<%= amenity.MaTienIch %>"
                             class="form-check-input"
                             type="checkbox"
-                            name="tienIch"
+                            name="TienIch"
                             value="<%= amenity.MaTienIch %>"
                             <%= room.TienIch.some(ti => ti.MaTienIch === amenity.MaTienIch) ? 'checked' : '' %>
                           />
@@ -496,27 +494,27 @@
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label required">Tên ngày lễ</label>
-              <input type="text" class="form-control" name="giaLe[${idx}][ten]" required>
+              <input type="text" class="form-control" name="GiaPhongNgayLe[${idx}][NgayLe]" required>
             </div>
 
             <div class="col-md-4">
               <label class="form-label required">Ngày bắt đầu</label>
-              <input type="date" class="form-control" name="giaLe[${idx}][start]" required>
+              <input type="date" class="form-control" name="GiaPhongNgayLe[${idx}][NgayBatDau]" required>
             </div>
 
             <div class="col-md-4">
               <label class="form-label required">Ngày kết thúc</label>
-              <input type="date" class="form-control" name="giaLe[${idx}][end]" required>
+              <input type="date" class="form-control" name="GiaPhongNgayLe[${idx}][NgayKetThuc]" required>
             </div>
 
             <div class="col-md-6">
               <label class="form-label required">Giá ngày (VNĐ)</label>
-              <input type="number" class="form-control" name="giaLe[${idx}][giaNgay]" min="0">
+              <input type="number" class="form-control" name="GiaPhongNgayLe[${idx}][GiaNgay]" min="0">
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Giá giờ (VNĐ)</label>
-              <input type="number" class="form-control" name="giaLe[${idx}][giaGio]" min="0">
+              <input type="number" class="form-control" name="GiaPhongNgayLe[${idx}][GiaGio]" min="0">
             </div>
           </div>
         </div>
@@ -623,7 +621,7 @@
         // Thêm hidden input để gửi về controller
         const input = document.createElement("input");
         input.type = "hidden";
-        input.name = "deletedImages[]";
+        input.name = "DeletedImages[]";
         input.value = imageId;
 
         document.getElementById("deletedImagesInputs").appendChild(input);

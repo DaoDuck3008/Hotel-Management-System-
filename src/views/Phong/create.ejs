@@ -110,7 +110,7 @@
     <!-- Thông báo -->
     <div
       class="d-flex justify-content-end pt-1 pe-1"
-      style="position: sticky; top: 0; z-index: 1000"
+      style="position: fixed; right: 0; top: 0; z-index: 1000"
     >
       <%- include('../partials/notification.ejs') %>
     </div>
@@ -150,7 +150,7 @@
                     type="text"
                     class="form-control"
                     id="maPhong"
-                    name="maPhong"
+                    name="MaPhong"
                     placeholder="VD: P101"
                     required
                   />
@@ -167,7 +167,7 @@
                     type="text"
                     class="form-control"
                     id="tenPhong"
-                    name="tenPhong"
+                    name="TenPhong"
                     placeholder="VD: Deluxury Ocean View"
                     required
                   />
@@ -180,7 +180,7 @@
                   <select
                     class="form-select"
                     id="loaiPhong"
-                    name="loaiPhong"
+                    name="TenLoaiPhong"
                     required
                   >
                     <option value="">Chọn loại phòng</option>
@@ -200,7 +200,7 @@
                   <select
                     class="form-select"
                     id="trangThai"
-                    name="trangThai"
+                    name="TrangThai"
                     disabled
                   >
                     <option value="Empty" selected>Trống</option>
@@ -215,7 +215,7 @@
                     type="number"
                     class="form-control"
                     id="soGiuong"
-                    name="soGiuong"
+                    name="SoGiuong"
                     min="1"
                     value="1"
                     required
@@ -231,7 +231,7 @@
                     type="number"
                     class="form-control"
                     id="sucChua"
-                    name="sucChua"
+                    name="SucChua"
                     min="1"
                     value="1"
                     required
@@ -244,7 +244,7 @@
                   <textarea
                     class="form-control"
                     id="moTa"
-                    name="moTa"
+                    name="MoTa"
                     rows="3"
                     placeholder="Mô tả chi tiết về phòng..."
                   ></textarea>
@@ -273,8 +273,8 @@
                   <input
                     type="number"
                     class="form-control"
-                    id="giaTheoNgay"
-                    name="giaTheoNgay"
+                    id="GiaTheoNgay"
+                    name="GiaNgayCB"
                     placeholder="VD: 2500000"
                     min="0"
                     required
@@ -290,7 +290,7 @@
                     type="number"
                     class="form-control"
                     id="giaTheoGio"
-                    name="giaTheoGio"
+                    name="GiaGioCB"
                     placeholder="VD: 500000"
                     min="0"
                   />
@@ -320,20 +320,20 @@
                     <input
                       type="hidden"
                       class="form-control"
-                      name="giaThu[2][thu]"
+                      name="GiaPhongTuan[2][ThuApDung]"
                       value="2"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[2][giaNgay]"
+                      name="GiaPhongTuan[2][GiaNgay]"
                       placeholder="Giá theo ngày"
                       min="0"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[2][giaGio]"
+                      name="GiaPhongTuan[2][GiaGio]"
                       placeholder="Giá theo giờ"
                       min="0"
                     />
@@ -346,20 +346,20 @@
                     <input
                       type="hidden"
                       class="form-control"
-                      name="giaThu[3][thu]"
+                      name="GiaPhongTuan[3][ThuApDung]"
                       value="3"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[3][giaNgay]"
+                      name="GiaPhongTuan[3][GiaNgay]"
                       min="0"
                       placeholder="Giá theo ngày"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[3][giaGio]"
+                      name="GiaPhongTuan[3][GiaGio]"
                       min="0"
                       placeholder="Giá theo giờ"
                     />
@@ -372,20 +372,20 @@
                     <input
                       type="hidden"
                       class="form-control"
-                      name="giaThu[4][thu]"
+                      name="GiaPhongTuan[4][ThuApDung]"
                       value="4"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[4][giaNgay]"
+                      name="GiaPhongTuan[4][GiaNgay]"
                       min="0"
                       placeholder="Giá theo ngày"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[4][giaGio]"
+                      name="GiaPhongTuan[4][GiaGio]"
                       min="0"
                       placeholder="Giá theo giờ"
                     />
@@ -398,20 +398,20 @@
                     <input
                       type="hidden"
                       class="form-control"
-                      name="giaThu[5][thu]"
+                      name="GiaPhongTuan[5][ThuApDung]"
                       value="5"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[5][giaNgay]"
+                      name="GiaPhongTuan[5][GiaNgay]"
                       min="0"
                       placeholder="Giá theo ngày"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[5][giaGio]"
+                      name="GiaPhongTuan[5][GiaGio]"
                       min="0"
                       placeholder="Giá theo giờ"
                     />
@@ -424,20 +424,20 @@
                     <input
                       type="hidden"
                       class="form-control"
-                      name="giaThu[6][thu]"
+                      name="GiaPhongTuan[6][ThuApDung]"
                       value="6"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[6][giaNgay]"
+                      name="GiaPhongTuan[6][GiaNgay]"
                       min="0"
                       placeholder="Giá theo ngày"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[6][giaGio]"
+                      name="GiaPhongTuan[6][GiaGio]"
                       min="0"
                       placeholder="Giá theo giờ"
                     />
@@ -450,20 +450,20 @@
                     <input
                       type="hidden"
                       class="form-control"
-                      name="giaThu[7][thu]"
+                      name="GiaPhongTuan[7][ThuApDung]"
                       value="7"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[7][giaNgay]"
+                      name="GiaPhongTuan[7][GiaNgay]"
                       min="0"
                       placeholder="Giá theo ngày"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[7][giaGio]"
+                      name="GiaPhongTuan[7][GiaGio]"
                       min="0"
                       placeholder="Giá theo giờ"
                     />
@@ -476,20 +476,20 @@
                     <input
                       type="hidden"
                       class="form-control"
-                      name="giaThu[8][thu]"
+                      name="GiaPhongTuan[8][ThuApDung]"
                       value="8"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[8][giaNgay]"
+                      name="GiaPhongTuan[8][GiaNgay]"
                       min="0"
                       placeholder="Giá theo ngày"
                     />
                     <input
                       type="number"
                       class="form-control"
-                      name="giaThu[8][giaGio]"
+                      name="GiaPhongTuan[8][GiaGio]"
                       min="0"
                       placeholder="Giá theo giờ"
                     />
@@ -533,7 +533,7 @@
               <input
                 type="file"
                 id="imageInput"
-                name="images"
+                name="HinhAnh"
                 multiple
                 accept="image/*"
                 class="d-none"
@@ -553,7 +553,7 @@
                       id="amenity-<%= amenity.MaTienIch %>"
                       class="form-check-input"
                       type="checkbox"
-                      name="tienIch"
+                      name="TienIch"
                       value="<%= amenity.MaTienIch %>"
                     />
 
@@ -610,27 +610,27 @@
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label required">Tên ngày lễ</label>
-              <input type="text" class="form-control" name="giaLe[${ngayLeIndex}][ten]" required>
+              <input type="text" class="form-control" name="GiaPhongNgayLe[${ngayLeIndex}][NgayLe]" required>
             </div>
 
             <div class="col-md-4">
               <label class="form-label required">Ngày bắt đầu</label>
-              <input type="date" class="form-control" name="giaLe[${ngayLeIndex}][start]" required>
+              <input type="date" class="form-control" name="GiaPhongNgayLe[${ngayLeIndex}][NgayBatDau]" required>
             </div>
 
             <div class="col-md-4">
               <label class="form-label required">Ngày kết thúc</label>
-              <input type="date" class="form-control" name="giaLe[${ngayLeIndex}][end]" required>
+              <input type="date" class="form-control" name="GiaPhongNgayLe[${ngayLeIndex}][NgayKetThuc]" required>
             </div>
 
             <div class="col-md-6">
               <label class="form-label required">Giá ngày (VNĐ)</label>
-              <input type="number" class="form-control" name="giaLe[${ngayLeIndex}][giaNgay]" min="0">
+              <input type="number" class="form-control" name="GiaPhongNgayLe[${ngayLeIndex}][GiaNgay]" min="0">
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Giá giờ (VNĐ)</label>
-              <input type="number" class="form-control" name="giaLe[${ngayLeIndex}][giaGio]" min="0">
+              <input type="number" class="form-control" name="GiaPhongNgayLe[${ngayLeIndex}][GiaGio]" min="0">
             </div>
           </div>
         </div>
