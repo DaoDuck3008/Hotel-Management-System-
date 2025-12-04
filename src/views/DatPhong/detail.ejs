@@ -108,7 +108,7 @@
                   <input
                     type="date"
                     class="form-control"
-                    value="<%= booking.KhachHang.NgaySinh?.toISOString().slice(0,10) %>"
+                    value="<%= new Date(booking.KhachHang.NgaySinh).toISOString().slice(0,10) %>"
                     readonly
                   />
                 </div>
@@ -149,7 +149,7 @@
                   <input
                     type="date"
                     class="form-control"
-                    value="<%= booking.NgayDat?.toISOString().slice(0,10) %>"
+                    value="<%= booking.DatPhong.NgayDat.toISOString().slice(0,10) %>"
                     readonly
                   />
                 </div>
@@ -159,7 +159,7 @@
                   <input
                     type="date"
                     class="form-control"
-                    value="<%= booking.NgayNhanPhong?.toISOString().slice(0,10) %>"
+                    value="<%= booking.DatPhong.NgayNhanPhong?.toISOString().slice(0,10) %>"
                     readonly
                   />
                 </div>
@@ -169,7 +169,7 @@
                   <input
                     type="date"
                     class="form-control"
-                    value="<%= booking.NgayTraPhong?.toISOString().slice(0,10) %>"
+                    value="<%= booking.DatPhong.NgayTraPhong?.toISOString().slice(0,10) %>"
                     readonly
                   />
                 </div>
@@ -188,7 +188,8 @@
                 <!-- Tên phòng -->
                 <h6 class="fw-bold mb-2">
                   <i class="fas fa-bed me-2"></i>
-                  <%= room.Phong?.TenPhong %> (<%= room.Phong?.TenLoaiPhong %>)
+                  <%= room.Phong.TenPhong %> (<%=
+                  room.Phong.LoaiPhong.TenLoaiPhong %>)
                 </h6>
 
                 <p class="mb-1">

@@ -1,11 +1,11 @@
 class KhachHangDTO {
   constructor({ MaKhachHang, HoVaTen, GioiTinh, NgaySinh, SDT, Email }) {
-    this._maKhachHang = MaKhachHang;
-    this._hoVaTen = HoVaTen;
-    this._gioiTinh = GioiTinh;
-    this._ngaySinh = NgaySinh;
-    this._sdt = SDT;
-    this._email = Email;
+    this.MaKhachHang = MaKhachHang || null;
+    this.HoVaTen = HoVaTen;
+    this.GioiTinh = GioiTinh;
+    this.NgaySinh = NgaySinh;
+    this.SDT = SDT;
+    this.Email = Email;
   }
 
   get maKhachHang() {
@@ -16,38 +16,38 @@ class KhachHangDTO {
   }
 
   get hoVaTen() {
-    return this._hoVaTen;
+    return this.HoVaTen;
   }
   set hoVaTen(v) {
-    this._hoVaTen = v;
+    this.HoVaTen = v;
   }
 
   get gioiTinh() {
-    return this._gioiTinh;
+    return this.GioiTinh;
   }
   set gioiTinh(v) {
-    this._gioiTinh = v;
+    this.GioiTinh = v;
   }
 
   get ngaySinh() {
-    return this._ngaySinh;
+    return this.NgaySinh;
   }
   set ngaySinh(v) {
-    this._ngaySinh = v;
+    this.NgaySinh = v;
   }
 
   get sdt() {
-    return this._sdt;
+    return this.SDT;
   }
   set sdt(v) {
-    this._sdt = v;
+    this.SDT = v;
   }
 
   get email() {
-    return this._email;
+    return this.Email;
   }
   set email(v) {
-    this._email = v;
+    this.Email = v;
   }
 }
 

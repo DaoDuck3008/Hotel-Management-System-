@@ -30,6 +30,11 @@ const initWebRoutes = (app) => {
     NhanVienController.index
   );
   router.get(
+    "/employees/search",
+    checkPermission(["NhanSu"]),
+    NhanVienController.search
+  );
+  router.get(
     "/employees/create",
     checkPermission(["NhanSu"]),
     NhanVienController.create
@@ -92,7 +97,7 @@ const initWebRoutes = (app) => {
   router.post(
     "/rooms",
     checkPermission(["Phong"]),
-    upload.array("images", 20),
+    upload.array("HinhAnh", 20),
     PhongController.store
   ); // Lưu phòng mới
   router.get(
@@ -113,7 +118,7 @@ const initWebRoutes = (app) => {
   router.put(
     "/rooms/:maPhong",
     checkPermission(["Phong"]),
-    upload.array("images", 20),
+    upload.array("HinhAnh", 20),
     PhongController.update
   ); // Cập nhật phòng
 

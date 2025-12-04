@@ -1,5 +1,6 @@
 import DatPhongDAO from "../DAO/DatPhongDAO.js";
 import PhongDAO from "../DAO/PhongDAO.js";
+import BookingDetailDTO from "../DTO/DatPhong/BookingDetailDTO.js";
 
 // Hiển thị danh sách đặt phòng
 const index = async (req, res) => {
@@ -49,8 +50,13 @@ const newCustomer = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    // console.log(">>> req.body:", req.body);
-    const result = await DatPhongDAO.createBooking(req.body);
+    const { rooms } = req.body;
+    const _rooms = JSON.parse(rooms);
+
+    let bookingDTO = new BookingDetailDTO(req.body);
+    bookingDTO.ChiTiet = _rooms;
+
+    const result = await DatPhongDAO.createBooking(bookingDTO);
 
     if (!result.success) {
       req.flash("error", result.message);
@@ -91,15 +97,21 @@ const editForm = async (req, res) => {
 export const edit = async (req, res) => {
   try {
     const { maDatPhong } = req.params;
-    console.log(">>> req.body:", req.body);
-    const result = await DatPhongDAO.updateBooking(maDatPhong, req.body);
+
+    const { rooms } = req.body;
+    const _rooms = JSON.parse(rooms);
+
+    // tạo đối tượng mới
+    let bookingDTO = new BookingDetailDTO(req.body);
+    bookingDTO.ChiTiet = _rooms;
+
+    const result = await DatPhongDAO.updateBooking(maDatPhong, bookingDTO);
 
     if (!result.success) {
       req.flash("error", result.message);
       return res.redirect(`/bookings/${maDatPhong}/edit`);
     }
 
-    console.log(">>> Đặt phòng thành công");
     req.flash("success", "Cập nhật đơn đặt phòng thành công");
     return res.redirect("/bookings");
   } catch (error) {

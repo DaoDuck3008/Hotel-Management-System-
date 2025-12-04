@@ -25,20 +25,20 @@ class PhongDAO {
   }
 
   // Tạo phòng mới
-  static async create(data, files) {
+  static async create(roomDTO) {
     const transaction = await db.sequelize.transaction();
     try {
       // lưu phòng mới
       const newRoom = await db.Phong.create(
         {
-          MaPhong: data.maPhong,
-          TenPhong: data.tenPhong,
-          TenLoaiPhong: data.loaiPhong,
-          SoGiuong: data.soGiuong,
-          SucChua: data.sucChua,
-          MoTa: data.moTa,
-          GiaNgayCB: data.giaTheoNgay,
-          GiaGioCB: data.giaTheoGio || null,
+          MaPhong: roomDTO.MaPhong,
+          TenPhong: roomDTO.TenPhong,
+          TenLoaiPhong: roomDTO.LoaiPhong.TenLoaiPhong,
+          SoGiuong: roomDTO.SoGiuong,
+          SucChua: roomDTO.SucChua,
+          MoTa: roomDTO.MoTa,
+          GiaNgayCB: roomDTO.GiaNgayCB,
+          GiaGioCB: roomDTO.GiaGioCB || null,
         },
         { transaction }
       );
@@ -50,7 +50,7 @@ class PhongDAO {
       // lưu trạng thái phòng là "Trống"
       await db.TrangThaiPhong.create(
         {
-          MaPhong: data.maPhong,
+          MaPhong: roomDTO.MaPhong,
           ThoiGianCapNhat: vietnamTime, // thời gian cập nhật theo giờ VN
           TrangThai: "Empty",
         },
@@ -58,12 +58,12 @@ class PhongDAO {
       );
 
       // lưu tiện ích phòng
-      if (data.tienIch && data.tienIch.length > 0) {
-        const tienIch = data.tienIch || [];
+      if (roomDTO.TienIch && roomDTO.TienIch.length > 0) {
+        const tienIch = roomDTO.TienIch || [];
         tienIch.forEach(async (maTienIch) => {
           await db.Phong_TienIch.create(
             {
-              MaPhong: data.maPhong,
+              MaPhong: roomDTO.MaPhong,
               MaTienIch: maTienIch,
             },
             { transaction }
@@ -72,18 +72,18 @@ class PhongDAO {
       }
 
       // lưu giá theo thứ trong tuần
-      if (data.giaThu && data.giaThu.length > 0) {
-        for (const item of data.giaThu) {
+      if (roomDTO.GiaPhongTuan && roomDTO.GiaPhongTuan.length > 0) {
+        for (const item of roomDTO.GiaPhongTuan) {
           // bỏ qua giá không hợp lệ hoặc để trống
-          if (!item || !item.thu) continue;
+          if (!item || !item.ThuApDung) continue;
 
           // lưu giá theo thứ
           await db.GiaPhongTuan.create(
             {
-              MaPhong: data.maPhong,
-              ThuApDung: item.thu,
-              GiaNgay: item.giaNgay || null,
-              GiaGio: item.giaGio || null,
+              MaPhong: roomDTO.MaPhong,
+              ThuApDung: item.ThuApDung,
+              GiaNgay: item.GiaNgay || null,
+              GiaGio: item.GiaGio || null,
             },
             { transaction }
           );
@@ -91,20 +91,20 @@ class PhongDAO {
       }
 
       // lưu giá theo ngày lễ
-      if (data.giaLe && data.giaLe.length > 0) {
-        for (const item of data.giaLe) {
+      if (roomDTO.GiaPhongNgayLe && roomDTO.GiaPhongNgayLe.length > 0) {
+        for (const item of roomDTO.GiaPhongNgayLe) {
           // bỏ qua giá không hợp lệ hoặc để trống
-          if (!item || !item.ten) continue;
+          if (!item || !item.NgayLe) continue;
 
           // lưu giá theo ngày lễ
           await db.GiaPhongNgayLe.create(
             {
-              MaPhong: data.maPhong,
-              NgayLe: item.ten,
-              NgayBatDau: item.start,
-              NgayKetThuc: item.end || null,
-              GiaNgay: item.giaNgay || null,
-              GiaGio: item.giaGio || null,
+              MaPhong: roomDTO.MaPhong,
+              NgayLe: item.NgayLe,
+              NgayBatDau: item.NgayBatDau,
+              NgayKetThuc: item.NgayKetThuc || null,
+              GiaNgay: item.GiaNgay || null,
+              GiaGio: item.GiaGio || null,
             },
             { transaction }
           );
@@ -112,8 +112,8 @@ class PhongDAO {
       }
 
       // upload hình ảnh phòng lên cloudinary (Cloud Storage)
-      if (files && files.length > 0) {
-        const uploadPromises = files.map((file) => {
+      if (roomDTO.HinhAnh && roomDTO.HinhAnh.length > 0) {
+        const uploadPromises = roomDTO.HinhAnh.map((file) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader
               .upload_stream(
@@ -136,7 +136,7 @@ class PhongDAO {
         // lưu các URL hình vào vào bảng HinhAnh
         await db.HinhAnh.bulkCreate(
           imageUrls.map((url) => ({
-            MaPhong: data.maPhong,
+            MaPhong: roomDTO.MaPhong,
             ImgURL: url,
           })),
           { transaction }
@@ -163,7 +163,6 @@ class PhongDAO {
         where: { MaPhong: maPhong },
         include: [
           { model: db.LoaiPhong, as: "LoaiPhong" },
-          // { model: db.TrangThaiPhong, as: "TrangThaiPhong" },
           { model: db.HinhAnh, as: "HinhAnh" },
           { model: db.GiaPhongTuan, as: "GiaPhongTuan" },
           { model: db.GiaPhongNgayLe, as: "GiaPhongNgayLe" },
@@ -175,7 +174,10 @@ class PhongDAO {
         ],
       });
 
+      //  Nếu không tìm thấy phòng thì trả về Null
       if (!room) return null;
+
+      // Trả về đối tượng phòng
       return new RoomDetailDTO(room);
     } catch (error) {
       console.error("Error fetching room by ID in PhongDAO:", error);
@@ -202,37 +204,37 @@ class PhongDAO {
   }
 
   // Cập nhật phòng
-  static async update(maPhong, data, files) {
+  static async update(updatedRoomDTO, deletedImages) {
     const transaction = await db.sequelize.transaction();
     try {
       // Cập nhật thông tin phòng
       await db.Phong.update(
         {
-          TenPhong: data.tenPhong,
-          TenLoaiPhong: data.loaiPhong,
-          SoGiuong: data.soGiuong,
-          SucChua: data.sucChua,
-          MoTa: data.moTa,
-          GiaNgayCB: data.giaTheoNgay,
-          GiaGioCB: data.giaTheoGio || null,
+          TenPhong: updatedRoomDTO.TenPhong,
+          TenLoaiPhong: updatedRoomDTO.LoaiPhong.TenLoaiPhong,
+          SoGiuong: updatedRoomDTO.SoGiuong,
+          SucChua: updatedRoomDTO.SucChua,
+          MoTa: updatedRoomDTO.MoTa,
+          GiaNgayCB: updatedRoomDTO.GiaNgayCB,
+          GiaGioCB: updatedRoomDTO.GiaGioCB || null,
         },
-        { where: { MaPhong: maPhong }, transaction }
+        { where: { MaPhong: updatedRoomDTO.MaPhong }, transaction }
       );
 
       // Cập nhật tiện ích phòng
-      if (data.tienIch && data.tienIch.length > 0) {
+      if (updatedRoomDTO.TienIch && updatedRoomDTO.TienIch.length > 0) {
         // Xoá hết tiện ích cũ
         await db.Phong_TienIch.destroy({
-          where: { MaPhong: maPhong },
+          where: { MaPhong: updatedRoomDTO.MaPhong },
           transaction,
         });
 
         // Thêm lại tiện ích mới
-        const tienIch = data.tienIch || [];
+        const tienIch = updatedRoomDTO.TienIch || [];
         tienIch.forEach(async (maTienIch) => {
           await db.Phong_TienIch.create(
             {
-              MaPhong: data.maPhong,
+              MaPhong: updatedRoomDTO.MaPhong,
               MaTienIch: maTienIch,
             },
             { transaction }
@@ -241,20 +243,23 @@ class PhongDAO {
       }
 
       // Cập nhật giá tuần
-      if (data.giaThu && data.giaThu.length > 0) {
-        for (const item of data.giaThu) {
+      if (
+        updatedRoomDTO.GiaPhongTuan &&
+        updatedRoomDTO.GiaPhongTuan.length > 0
+      ) {
+        for (const item of updatedRoomDTO.GiaPhongTuan) {
           // bỏ qua giá không hợp lệ hoặc để trống
-          if (!item || !item.thu) continue;
+          if (!item || !item.ThuApDung) continue;
 
           await db.GiaPhongTuan.update(
             {
-              GiaNgay: item.giaNgay || null,
-              GiaGio: item.giaGio || null,
+              GiaNgay: item.GiaNgay || null,
+              GiaGio: item.GiaGio || null,
             },
             {
               where: {
-                MaPhong: maPhong,
-                ThuApDung: item.thu,
+                MaPhong: updatedRoomDTO.MaPhong,
+                ThuApDung: item.ThuApDung,
               },
               transaction,
             }
@@ -263,22 +268,25 @@ class PhongDAO {
       }
 
       // Cập nhật giá ngày lễ
-      if (data.giaLe && data.giaLe.length > 0) {
-        for (const item of data.giaLe) {
+      if (
+        updatedRoomDTO.GiaPhongNgayLe &&
+        updatedRoomDTO.GiaPhongNgayLe.length > 0
+      ) {
+        for (const item of updatedRoomDTO.GiaPhongNgayLe) {
           // bỏ qua giá không hợp lệ hoặc để trống
-          if (!item || !item.ten) continue;
+          if (!item || !item.NgayLe) continue;
 
           await db.GiaPhongNgayLe.update(
             {
-              NgayBatDau: item.start,
-              NgayKetThuc: item.end || null,
-              GiaNgay: item.giaNgay || null,
-              GiaGio: item.giaGio || null,
+              NgayBatDau: item.NgayBatDau,
+              NgayKetThuc: item.NgayKetThuc || null,
+              GiaNgay: item.GiaNgay || null,
+              GiaGio: item.GiaGio || null,
             },
             {
               where: {
-                MaPhong: maPhong,
-                NgayLe: item.ten,
+                MaPhong: updatedRoomDTO.MaPhong,
+                NgayLe: item.NgayLe,
               },
               transaction,
             }
@@ -287,25 +295,25 @@ class PhongDAO {
       }
 
       // Xóa hình ảnh đã chọn
-      if (data.deletedImages && data.deletedImages.length > 0) {
+      if (deletedImages && deletedImages.length > 0) {
         await db.HinhAnh.destroy({
           where: {
-            MaHinhAnh: data.deletedImages,
+            MaHinhAnh: deletedImages,
           },
           transaction,
         });
       }
 
       // Nếu có file mới được tải lên
-      if (files && files.length > 0) {
+      if (updatedRoomDTO.HinhAnh && updatedRoomDTO.HinhAnh.length > 0) {
         // upload hình ảnh phòng lên cloudinary (Cloud Storage)
-        const uploadPromises = files.map((file) => {
+        const uploadPromises = updatedRoomDTO.HinhAnh.map((file) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader
               .upload_stream(
                 {
                   folder: "hotel/phong",
-                  public_id: `${maPhong}_${Date.now()}`,
+                  public_id: `${updatedRoomDTO.MaPhong}_${Date.now()}`,
                 },
                 async (error, result) => {
                   if (error) reject(error);
@@ -322,7 +330,7 @@ class PhongDAO {
         // lưu hình ảnh vào bảng HinhAnh
         await db.HinhAnh.bulkCreate(
           imageUrls.map((url) => ({
-            MaPhong: maPhong,
+            MaPhong: updatedRoomDTO.MaPhong,
             ImgURL: url,
           })),
           { transaction }
@@ -397,7 +405,8 @@ class PhongDAO {
         include,
       });
 
-      return rooms;
+      // Trả về đối tượng phòng
+      return rooms.map((room) => new RoomDetailDTO(room));
     } catch (error) {
       console.error("Error searching rooms in PhongDAO:", error);
       throw error;
@@ -521,6 +530,7 @@ class PhongDAO {
   }
 }
 
+// Lấy giờ Việt Nam
 function getVietnamDate(dateInput = new Date()) {
   return new Date(
     new Date(dateInput).toLocaleString("en-US", {

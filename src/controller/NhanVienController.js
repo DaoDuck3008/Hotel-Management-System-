@@ -1,6 +1,6 @@
 import NhanVienDAO from "../DAO/NhanVienDAO";
 import db from "../models/index";
-import ExcelJS from "exceljs";
+import NhanVienDTO from "../DTO/NhanVien/NhanVienDTO";
 
 //Hiển thị danh sách nhân viên
 const index = async (req, res) => {
@@ -10,21 +10,16 @@ const index = async (req, res) => {
 
 //Mở form tạo nhân viên mới
 const create = async (req, res) => {
-  // const MaNV = req.body.MaNV;
-  // const HoTen = req.body.HoTen;
-  // const NgayVaoLam = req.body.NgayVaoLam;
-  // const NgaySinh = req.body.NgaySinh;
-  // const PhongBan = req.body.PhongBan;
-  // const SDT = req.body.SDT;
-  // const Email = req.body.Email;
-  // const ImgURL = req.body.ImgURL;
-  // const TrangThai = req.body.TrangThai;
   return res.render("NhanSu/create.ejs");
 };
 
 //Lưu nhân viên mới
 const store = async (req, res) => {
-  const result = await NhanVienDAO.create(req.body, req.file);
+  // Tạo đối tượng nhân viên
+  let employeeDTO = new NhanVienDTO(req.body);
+  employeeDTO.ImgURL = req.file;
+
+  const result = await NhanVienDAO.create(employeeDTO);
 
   if (!result.success) {
     console.error("Error in create NhanViencontroller:", result.message);
@@ -44,7 +39,7 @@ const detail = async (req, res) => {
   }
 };
 
-//Mmowr form chỉnh sửa nhân viên
+//Mở form chỉnh sửa nhân viên
 const edit = async (req, res) => {
   const { MaNV } = req.params;
   const employee = await NhanVienDAO.getById(MaNV);
@@ -61,9 +56,13 @@ const edit = async (req, res) => {
 //Chỉnh sửa nhân viên
 const update = async (req, res) => {
   try {
-    console.log("Update NhanVien with data:", req.file);
     const MaNV = req.params.MaNV;
-    const result = await NhanVienDAO.update(req.body, req.file, MaNV);
+
+    // Tạo đối tượng nhân viên mới
+    let employeeDTO = new NhanVienDTO(req.body);
+    employeeDTO.ImgURL = req.file;
+
+    const result = await NhanVienDAO.update(employeeDTO, MaNV);
 
     if (!result.success) {
       console.error("Error in update NhanViencontroller:", result.message);
@@ -122,10 +121,6 @@ const search = async (req, res) => {
   }
 };
 
-// const statistics = async (req, res) => {};
-
-// const exportExcel = async (req, res) => {};
-
 module.exports = {
   create,
   edit,
@@ -135,6 +130,4 @@ module.exports = {
   index,
   store,
   search,
-  //   statistics,
-  //   exportExcel,
 };

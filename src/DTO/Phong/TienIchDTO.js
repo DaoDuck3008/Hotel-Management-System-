@@ -6,24 +6,24 @@ class TienIchDTO {
     this.MoTa = MoTa;
   }
 
-  get id() {
+  get maTienIch() {
     return this.MaTienIch;
   }
-  set id(v) {
+  set maTienIch(v) {
     this.MaTienIch = v;
   }
 
-  get ten() {
+  get tenTienIch() {
     return this.TenTienIch;
   }
-  set ten(v) {
+  set tenTienIch(v) {
     this.TenTienIch = v;
   }
 
-  get icon() {
+  get iconURL() {
     return this.IconURL;
   }
-  set icon(v) {
+  set iconURL(v) {
     this.IconURL = v;
   }
 
