@@ -51,9 +51,11 @@
       .room-card.cleaning {
         border-left: 5px solid #f59e0b;
       }
-.room-card.booked {
-  border-left: 5px solid #8b5cf6;
-}
+
+      .room-card.booked {
+        border-left: 5px solid #8b5cf6;
+      }
+
       .room-image {
         width: 100%;
         height: 200px;
@@ -155,10 +157,12 @@
         background: #fef3c7;
         color: #92400e;
       }
-.status-badge.booked {
-  background: #ede9fe;
-  color: #6b21a8;
-}
+
+      .status-badge.booked {
+        background: #ede9fe;
+        color: #6b21a8;
+      }
+
       .status-buttons {
         display: flex;
         gap: 8px;
@@ -195,10 +199,12 @@
         background: #f59e0b;
         color: white;
       }
-.btn-booked {
-  background: #8b5cf6;
-  color: white;
-}
+
+      .btn-booked {
+        background: #8b5cf6;
+        color: white;
+      }
+
       .stats-card {
         background: white;
         border-radius: 12px;
@@ -243,6 +249,23 @@
         color: white;
         font-size: 48px;
       }
+
+      .booking-code {
+        background: #eff6ff;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 5px;
+        border-left: 3px solid #3b82f6;
+      }
+
+      .booking-code .price-label {
+        color: #1e40af;
+      }
+
+      .booking-code .price-value {
+        color: #2563eb;
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
@@ -272,8 +295,6 @@
     </div>
 
     <div class="container-fluid">
-
-
       <!-- Thống kê -->
       <div class="row mb-4 g-3">
         <div class="col">
@@ -311,7 +332,7 @@
       <!-- Bộ lọc -->
       <div class="filter-section">
         <div class="row align-items-end">
-          <div class="col-md-4">
+          <div class="col-md-3">
             <label class="form-label">Tìm kiếm phòng</label>
             <input
               type="text"
@@ -320,7 +341,16 @@
               placeholder="Nhập mã phòng hoặc tên..."
             />
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
+            <label class="form-label">Tìm theo mã đơn</label>
+            <input
+              type="text"
+              class="form-control"
+              id="bookingCodeSearch"
+              placeholder="Nhập mã đơn..."
+            />
+          </div>
+          <div class="col-md-2">
             <label class="form-label">Lọc theo trạng thái</label>
             <select class="form-select" id="statusFilter">
               <option value="">Tất cả</option>
@@ -365,6 +395,7 @@
           data-status="<%= status %>"
           data-type="<%= room.LoaiPhong.TenLoaiPhong %>"
           data-name="<%= room.TenPhong %>"
+          data-booking="<%= room.MaDonDatPhong || '' %>"
         >
           <!-- Hình ảnh phòng -->
           <% if (firstImage) { %>
@@ -398,17 +429,30 @@
                 <span><%= room.SucChua %> người</span>
               </div>
             </div>
-          <!-- Giá phòng -->
-          <div class="room-price">
-            <div class="price-item">
-              <span class="price-label">Giá theo ngày:</span>
-              <span class="price-value"><%= room.getGiaNgayToday().toLocaleString('vi-VN') %> VNĐ</span>
+
+            <!-- Giá phòng -->
+            <div class="room-price">
+              <div class="price-item">
+                <span class="price-label">Giá theo ngày:</span>
+                <span class="price-value"><%= room.getGiaNgayToday().toLocaleString('vi-VN') %> VNĐ</span>
+              </div>
+              <div class="price-item">
+                <span class="price-label">Giá theo giờ:</span>
+                <span class="price-value"><%= room.getGiaGioToday().toLocaleString('vi-VN') %> VNĐ</span>
+              </div>
+              
+              <!-- Hiển thị mã đơn nếu phòng đã đặt hoặc đang sử dụng -->
+              <% if ((status === 'Booked' || status === 'Occupied') && room.MaDonDatPhong) { %>
+              <div class="booking-code">
+                <div class="price-item">
+                  <span class="price-label">
+                    <i class="fas fa-file-invoice me-1"></i>Mã đơn:
+                  </span>
+                  <span class="price-value"><%= room.MaDonDatPhong %></span>
+                </div>
+              </div>
+              <% } %>
             </div>
-            <div class="price-item">
-              <span class="price-label">Giá theo giờ:</span>
-              <span class="price-value"><%= room.getGiaGioToday().toLocaleString('vi-VN') %> VNĐ</span>
-            </div>
-          </div>
 
             <!-- Cập nhật trạng thái -->
             <div class="status-buttons">
@@ -434,12 +478,12 @@
                 <i class="fas fa-broom me-1"></i>Đang dọn
               </button>
               <button
-  class="status-btn btn-booked"
-  onclick="updateStatus('<%= room.MaPhong %>', 'Booked')"
-  <%= status === 'Booked' ? 'disabled style="opacity: 0.5"' : '' %>
->
-  <i class="fas fa-calendar-check me-1"></i>Đã đặt
-</button>
+                class="status-btn btn-booked"
+                onclick="updateStatus('<%= room.MaPhong %>', 'Booked')"
+                <%= status === 'Booked' ? 'disabled style="opacity: 0.5"' : '' %>
+              >
+                <i class="fas fa-calendar-check me-1"></i>Đã đặt
+              </button>
             </div>
           </div>
         </div>
@@ -482,6 +526,9 @@
         const searchTerm = document
           .getElementById("searchInput")
           .value.toLowerCase();
+        const bookingCode = document
+          .getElementById("bookingCodeSearch")
+          .value.toLowerCase();
         const statusFilter = document.getElementById("statusFilter").value;
         const typeFilter = document.getElementById("typeFilter").value;
 
@@ -492,14 +539,17 @@
           const roomName = card.dataset.name.toLowerCase();
           const status = card.dataset.status;
           const type = card.dataset.type;
+          const booking = card.dataset.booking.toLowerCase();
 
           const matchSearch = !searchTerm || 
             roomNumber.includes(searchTerm) || 
             roomName.includes(searchTerm);
+          const matchBooking = !bookingCode || 
+            booking.includes(bookingCode);
           const matchStatus = !statusFilter || status === statusFilter;
           const matchType = !typeFilter || type === typeFilter;
 
-          if (matchSearch && matchStatus && matchType) {
+          if (matchSearch && matchBooking && matchStatus && matchType) {
             card.style.display = "block";
           } else {
             card.style.display = "none";
@@ -509,6 +559,7 @@
 
       function resetFilters() {
         document.getElementById("searchInput").value = "";
+        document.getElementById("bookingCodeSearch").value = "";
         document.getElementById("statusFilter").value = "";
         document.getElementById("typeFilter").value = "";
         filterRooms();
@@ -517,6 +568,9 @@
       // Event listeners
       document
         .getElementById("searchInput")
+        .addEventListener("input", filterRooms);
+      document
+        .getElementById("bookingCodeSearch")
         .addEventListener("input", filterRooms);
       document
         .getElementById("statusFilter")

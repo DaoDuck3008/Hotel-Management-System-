@@ -6,6 +6,36 @@ const index = async (req, res) => {
     const rooms = await DatPhongDAO.getAllRoomsWithStatus();
     const stats = await DatPhongDAO.getRoomStatusStatistics();
 
+    // Lấy thông tin đơn đặt phòng cho các phòng đã đặt hoặc đang sử dụng
+    const db = require("../models/index.js");
+
+    for (const room of rooms) {
+      const status = room.getCurrentTrangThai();
+
+      if (status === "Booked" || status === "Occupied") {
+        // Tìm đơn đặt phòng gần nhất của phòng này
+        const booking = await db.ChiTietDatPhong.findOne({
+          where: { MaPhong: room.MaPhong },
+          include: [
+            {
+              model: db.DatPhong,
+              as: "DatPhong",
+              where: {
+                NgayTraPhong: { [db.Sequelize.Op.gte]: new Date() },
+              },
+            },
+          ],
+          order: [
+            [{ model: db.DatPhong, as: "DatPhong" }, "NgayNhanPhong", "DESC"],
+          ],
+        });
+
+        if (booking && booking.DatPhong) {
+          room.MaDonDatPhong = booking.DatPhong.MaDatPhong;
+        }
+      }
+    }
+
     return res.render("LeTan/index.ejs", { rooms, stats });
   } catch (error) {
     console.error("Error in receptions index:", error);
