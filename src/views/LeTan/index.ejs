@@ -329,28 +329,19 @@
         </div>
       </div>
 
-      <!-- Bộ lọc -->
+      <!-- Tìm kiếm -->
       <div class="filter-section">
         <div class="row align-items-end">
-          <div class="col-md-3">
-            <label class="form-label">Tìm kiếm phòng</label>
+          <div class="col-md-5">
+            <label class="form-label">Tìm kiếm</label>
             <input
               type="text"
               class="form-control"
               id="searchInput"
-              placeholder="Nhập mã phòng hoặc tên..."
+              placeholder="Tìm theo mã phòng, tên phòng hoặc mã đơn..."
             />
           </div>
-          <div class="col-md-2">
-            <label class="form-label">Tìm theo mã đơn</label>
-            <input
-              type="text"
-              class="form-control"
-              id="bookingCodeSearch"
-              placeholder="Nhập mã đơn..."
-            />
-          </div>
-          <div class="col-md-2">
+          <div class="col-md-3">
             <label class="form-label">Lọc theo trạng thái</label>
             <select class="form-select" id="statusFilter">
               <option value="">Tất cả</option>
@@ -370,9 +361,9 @@
               <% }) %>
             </select>
           </div>
-          <div class="col-md-2">
+          <div class="col-md-1">
             <button class="btn btn-secondary w-100" onclick="resetFilters()">
-              <i class="fas fa-redo me-2"></i>Đặt lại
+              <i class="fas fa-redo"></i> Đặt lại
             </button>
           </div>
         </div>
@@ -526,9 +517,6 @@
         const searchTerm = document
           .getElementById("searchInput")
           .value.toLowerCase();
-        const bookingCode = document
-          .getElementById("bookingCodeSearch")
-          .value.toLowerCase();
         const statusFilter = document.getElementById("statusFilter").value;
         const typeFilter = document.getElementById("typeFilter").value;
 
@@ -541,15 +529,15 @@
           const type = card.dataset.type;
           const booking = card.dataset.booking.toLowerCase();
 
+          // Tìm kiếm trong mã phòng, tên phòng và mã đơn
           const matchSearch = !searchTerm || 
             roomNumber.includes(searchTerm) || 
-            roomName.includes(searchTerm);
-          const matchBooking = !bookingCode || 
-            booking.includes(bookingCode);
+            roomName.includes(searchTerm) ||
+            booking.includes(searchTerm);
           const matchStatus = !statusFilter || status === statusFilter;
           const matchType = !typeFilter || type === typeFilter;
 
-          if (matchSearch && matchBooking && matchStatus && matchType) {
+          if (matchSearch && matchStatus && matchType) {
             card.style.display = "block";
           } else {
             card.style.display = "none";
@@ -559,7 +547,6 @@
 
       function resetFilters() {
         document.getElementById("searchInput").value = "";
-        document.getElementById("bookingCodeSearch").value = "";
         document.getElementById("statusFilter").value = "";
         document.getElementById("typeFilter").value = "";
         filterRooms();
@@ -568,9 +555,6 @@
       // Event listeners
       document
         .getElementById("searchInput")
-        .addEventListener("input", filterRooms);
-      document
-        .getElementById("bookingCodeSearch")
         .addEventListener("input", filterRooms);
       document
         .getElementById("statusFilter")
