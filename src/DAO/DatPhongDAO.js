@@ -260,7 +260,7 @@ class DatPhongDAO {
           );
         }
       }
-      for (const room of roomsArray) {
+      for (const room of ChiTiet) {
         const now = new Date();
         const vietnamTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
