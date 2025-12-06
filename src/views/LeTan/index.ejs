@@ -52,6 +52,10 @@
         border-left: 5px solid #f59e0b;
       }
 
+      .room-card.booked {
+        border-left: 5px solid #8b5cf6;
+      }
+
       .room-image {
         width: 100%;
         height: 200px;
@@ -154,6 +158,11 @@
         color: #92400e;
       }
 
+      .status-badge.booked {
+        background: #ede9fe;
+        color: #6b21a8;
+      }
+
       .status-buttons {
         display: flex;
         gap: 8px;
@@ -188,6 +197,11 @@
 
       .btn-cleaning {
         background: #f59e0b;
+        color: white;
+      }
+
+      .btn-booked {
+        background: #8b5cf6;
         color: white;
       }
 
@@ -235,6 +249,23 @@
         color: white;
         font-size: 48px;
       }
+
+      .booking-code {
+        background: #eff6ff;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 5px;
+        border-left: 3px solid #3b82f6;
+      }
+
+      .booking-code .price-label {
+        color: #1e40af;
+      }
+
+      .booking-code .price-value {
+        color: #2563eb;
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
@@ -265,43 +296,49 @@
 
     <div class="container-fluid">
       <!-- Thống kê -->
-      <div class="row mb-4">
-        <div class="col-md-3">
+      <div class="row mb-4 g-3">
+        <div class="col">
           <div class="stats-card">
             <div class="stats-number text-primary"><%= stats.total %></div>
             <div class="stats-label">Tổng số phòng</div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col">
           <div class="stats-card">
             <div class="stats-number text-success"><%= stats.empty %></div>
             <div class="stats-label">Phòng trống</div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col">
           <div class="stats-card">
             <div class="stats-number text-danger"><%= stats.occupied %></div>
             <div class="stats-label">Đang sử dụng</div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col">
           <div class="stats-card">
             <div class="stats-number text-warning"><%= stats.cleaning %></div>
             <div class="stats-label">Đang dọn</div>
           </div>
         </div>
+        <div class="col">
+          <div class="stats-card">
+            <div class="stats-number" style="color: #8b5cf6"><%= stats.booked || 0 %></div>
+            <div class="stats-label">Đã đặt</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Bộ lọc -->
+      <!-- Tìm kiếm -->
       <div class="filter-section">
         <div class="row align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">Tìm kiếm phòng</label>
+          <div class="col-md-5">
+            <label class="form-label">Tìm kiếm</label>
             <input
               type="text"
               class="form-control"
               id="searchInput"
-              placeholder="Nhập mã phòng hoặc tên..."
+              placeholder="Tìm theo mã phòng, tên phòng hoặc mã đơn..."
             />
           </div>
           <div class="col-md-3">
@@ -311,6 +348,7 @@
               <option value="Empty">Trống</option>
               <option value="Occupied">Đang sử dụng</option>
               <option value="Cleaning">Đang dọn</option>
+              <option value="Booked">Đã đặt</option>
             </select>
           </div>
           <div class="col-md-3">
@@ -323,9 +361,9 @@
               <% }) %>
             </select>
           </div>
-          <div class="col-md-2">
+          <div class="col-md-1">
             <button class="btn btn-secondary w-100" onclick="resetFilters()">
-              <i class="fas fa-redo me-2"></i>Đặt lại
+              <i class="fas fa-redo"></i> Đặt lại
             </button>
           </div>
         </div>
@@ -336,7 +374,10 @@
         <% rooms.forEach(room => { 
           const status = room.getCurrentTrangThai();
           const statusClass = status.toLowerCase(); 
-          const statusText = status === 'Empty' ? 'Trống' : status === 'Occupied' ? 'Đang sử dụng' : 'Đang dọn';
+          const statusText = status === 'Empty' ? 'Trống' : 
+                   status === 'Occupied' ? 'Đang sử dụng' : 
+                   status === 'Cleaning' ? 'Đang dọn' : 
+                   status === 'Booked' ? 'Đã đặt' : status;
           const firstImage = room.HinhAnh && room.HinhAnh.length > 0 ? room.HinhAnh[0].ImgURL : null;
         %>
         <div
@@ -345,6 +386,7 @@
           data-status="<%= status %>"
           data-type="<%= room.LoaiPhong.TenLoaiPhong %>"
           data-name="<%= room.TenPhong %>"
+          data-booking="<%= room.MaDonDatPhong || '' %>"
         >
           <!-- Hình ảnh phòng -->
           <% if (firstImage) { %>
@@ -378,17 +420,30 @@
                 <span><%= room.SucChua %> người</span>
               </div>
             </div>
-          <!-- Giá phòng -->
-          <div class="room-price">
-            <div class="price-item">
-              <span class="price-label">Giá theo ngày:</span>
-              <span class="price-value"><%= room.getGiaNgayToday().toLocaleString('vi-VN') %> VNĐ</span>
+
+            <!-- Giá phòng -->
+            <div class="room-price">
+              <div class="price-item">
+                <span class="price-label">Giá theo ngày:</span>
+                <span class="price-value"><%= room.getGiaNgayToday().toLocaleString('vi-VN') %> VNĐ</span>
+              </div>
+              <div class="price-item">
+                <span class="price-label">Giá theo giờ:</span>
+                <span class="price-value"><%= room.getGiaGioToday().toLocaleString('vi-VN') %> VNĐ</span>
+              </div>
+              
+              <!-- Hiển thị mã đơn nếu phòng đã đặt hoặc đang sử dụng -->
+              <% if ((status === 'Booked' || status === 'Occupied') && room.MaDonDatPhong) { %>
+              <div class="booking-code">
+                <div class="price-item">
+                  <span class="price-label">
+                    <i class="fas fa-file-invoice me-1"></i>Mã đơn:
+                  </span>
+                  <span class="price-value"><%= room.MaDonDatPhong %></span>
+                </div>
+              </div>
+              <% } %>
             </div>
-            <div class="price-item">
-              <span class="price-label">Giá theo giờ:</span>
-              <span class="price-value"><%= room.getGiaGioToday().toLocaleString('vi-VN') %> VNĐ</span>
-            </div>
-          </div>
 
             <!-- Cập nhật trạng thái -->
             <div class="status-buttons">
@@ -412,6 +467,13 @@
                 <%= status === 'Cleaning' ? 'disabled style="opacity: 0.5"' : '' %>
               >
                 <i class="fas fa-broom me-1"></i>Đang dọn
+              </button>
+              <button
+                class="status-btn btn-booked"
+                onclick="updateStatus('<%= room.MaPhong %>', 'Booked')"
+                <%= status === 'Booked' ? 'disabled style="opacity: 0.5"' : '' %>
+              >
+                <i class="fas fa-calendar-check me-1"></i>Đã đặt
               </button>
             </div>
           </div>
@@ -465,10 +527,13 @@
           const roomName = card.dataset.name.toLowerCase();
           const status = card.dataset.status;
           const type = card.dataset.type;
+          const booking = card.dataset.booking.toLowerCase();
 
+          // Tìm kiếm trong mã phòng, tên phòng và mã đơn
           const matchSearch = !searchTerm || 
             roomNumber.includes(searchTerm) || 
-            roomName.includes(searchTerm);
+            roomName.includes(searchTerm) ||
+            booking.includes(searchTerm);
           const matchStatus = !statusFilter || status === statusFilter;
           const matchType = !typeFilter || type === typeFilter;
 

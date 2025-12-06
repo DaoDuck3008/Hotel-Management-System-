@@ -142,6 +142,7 @@ class Phong extends Model {
       (a, b) => new Date(b.ThoiGianCapNhat) - new Date(a.ThoiGianCapNhat)
     )[0];
 
+    // Nếu vì lý do nào đó latest vẫn undefined
     // Nếu vì lý do nào đó latest bị undefined thì trả về Empty
     if (!latest || !latest.TrangThai) {
       return "Empty";
