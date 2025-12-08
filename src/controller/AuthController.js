@@ -33,6 +33,9 @@ const login = async (req, res) => {
 
     // 4. Tùy chọn: Chuyển hướng theo phòng ban
     switch (user.PhongBan) {
+      case "Admin":
+        req.flash("success", "Đăng nhập thành công với Admin!");
+        return res.redirect("/rooms");
       case "LeTan":
         req.flash("success", "Đăng nhập thành công!");
         return res.redirect("/receptions");

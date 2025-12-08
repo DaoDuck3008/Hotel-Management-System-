@@ -39,32 +39,8 @@
   <body>
     <div class="container-fluid">
       <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 sidebar p-0" id="sidebar">
-          <div class="sidebar-header p-3">
-            <div class="logo d-flex align-items-center gap-3 mb-4">
-              <i class="fas fa-hotel fa-2x text-white"></i>
-              <h1 class="h5 text-white mb-0 fw-bold">Hotel MS</h1>
-            </div>
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link text-white active" data-menu="bookings">
-                  <i class="fas fa-book me-2"></i> <span>Đơn Đặt Phòng</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-white" data-menu="rooms">
-                  <i class="fas fa-bed me-2"></i> <span>Quản lý Phòng</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-white" data-menu="customers">
-                  <i class="fas fa-users me-2"></i> <span>Khách hàng</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <!-- sidebar -->
+        <%- include('../partials/sidebar.ejs') %>
 
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10 ms-auto p-0">

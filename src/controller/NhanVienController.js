@@ -1,6 +1,6 @@
 import NhanVienDAO from "../DAO/NhanVienDAO";
-import db from "../models/index";
 import NhanVienDTO from "../DTO/NhanVien/NhanVienDTO";
+import { createNhanVienSchema } from "../validators/NhanVienValidator.js";
 
 //Hiển thị danh sách nhân viên
 const index = async (req, res) => {
@@ -15,19 +15,43 @@ const create = async (req, res) => {
 
 //Lưu nhân viên mới
 const store = async (req, res) => {
-  // Tạo đối tượng nhân viên
-  let employeeDTO = new NhanVienDTO(req.body);
-  employeeDTO.ImgURL = req.file;
+  try {
+    // Validate dữ liệu đầu vào
+    const { error } = createNhanVienSchema.validate(req.body, {
+      abortEarly: false,
+      convert: true,
+    });
+    // Nếu dữ liệu không hợp lệ, thì trả về lỗi
+    if (error) {
+      req.flash(
+        "error",
+        error.details.map((err) => err.message)
+      );
+      return res.redirect("/employees/create");
+    }
 
-  const result = await NhanVienDAO.create(employeeDTO);
+    // Tạo đối tượng nhân viên
+    let employeeDTO = new NhanVienDTO(req.body);
+    employeeDTO.ImgURL = req.file;
 
-  if (!result.success) {
-    console.error("Error in create NhanViencontroller:", result.message);
+    const result = await NhanVienDAO.create(employeeDTO);
+
+    // Kiểm tra kết quả trả về từ DAO
+    if (!result.success) {
+      console.error("Error in create NhanViencontroller:", result.message);
+      return res.redirect("/employees");
+    }
+
+    req.flash("success", "Tạo nhân viên thành công!");
     return res.redirect("/employees");
+  } catch (e) {
+    console.error("Error in store NhanViencontroller:", e);
+    req.flash("error", "Đã xảy ra lỗi!");
+    return res.redirect("/employees/create");
   }
-  return res.redirect("/employees");
 };
 
+// Xem chi tiết thông tin nhân viên
 const detail = async (req, res) => {
   try {
     const { MaNV } = req.params;
@@ -35,27 +59,53 @@ const detail = async (req, res) => {
     return res.render("NhanSu/detail.ejs", { employee: employee });
   } catch (error) {
     console.error("Error in NhanVienController: ", error);
+    req.flash("error", "Đã xảy ra lỗi!");
     return res.redirect("/employees");
   }
 };
 
 //Mở form chỉnh sửa nhân viên
 const edit = async (req, res) => {
-  const { MaNV } = req.params;
-  const employee = await NhanVienDAO.getById(MaNV);
+  try {
+    // Lấy mã nhân viên từ tham số URL
+    const { MaNV } = req.params;
+    const employee = await NhanVienDAO.getById(MaNV);
 
-  if (!employee) {
-    console.error("Error in edit NhanViencontroller: Nhân Viên không tồn tại!");
-    req.flash("error", "Nhân Viên không tồn tại!");
+    // Kiểm tra nhân viên tồn tại
+    if (!employee) {
+      console.error(
+        "Error in edit NhanViencontroller: Nhân Viên không tồn tại!"
+      );
+      req.flash("error", "Nhân Viên không tồn tại!");
+      return res.redirect("/employees");
+    }
+
+    return res.render("NhanSu/edit.ejs", { employee });
+  } catch (error) {
+    console.error("Error in edit NhanViencontroller:", error);
+    req.flash("error", "Đã xảy ra lỗi!");
     return res.redirect("/employees");
   }
-
-  return res.render("NhanSu/edit.ejs", { employee });
 };
 
 //Chỉnh sửa nhân viên
 const update = async (req, res) => {
+  console.log(">>> req.body", req.body);
   try {
+    // Validate dữ liệu đầu vào
+    const { error } = createNhanVienSchema.validate(req.body, {
+      abortEarly: false,
+      convert: true,
+    });
+    // Nếu dữ liệu không hợp lệ, thì trả về lỗi
+    if (error) {
+      req.flash(
+        "error",
+        error.details.map((err) => err.message)
+      );
+      return res.redirect("/employees/edit/" + req.params.MaNV);
+    }
+
     const MaNV = req.params.MaNV;
 
     // Tạo đối tượng nhân viên mới
@@ -69,6 +119,7 @@ const update = async (req, res) => {
       return res.redirect("/employees");
     }
 
+    req.flash("success", "Cập nhật nhân viên thành công!");
     return res.redirect("/employees");
   } catch (error) {
     console.error("Error in update NhanViencontroller:", error);
@@ -94,21 +145,20 @@ const destroy = async (req, res) => {
 
     // Kiểm tra kết quả trả về từ DAO
     if (!result.success) {
-      return res
-        .status(500)
-        .json({ message: "Xóa nhan vien thất bại!", success: false });
+      req.flash("error", "Xóa nhân viên thất bại!");
+      return res.redirect("/employees");
     }
 
+    req.flash("success", "Xóa nhân viên thành công!");
     return res.redirect("/employees");
   } catch (error) {
     console.error("Error in delete NhanViencontroller:", error);
-    return res
-      .status(500)
-      .json({ message: "Xóa nhan vien thất bại!", success: false });
+    req.flash("error", "Đã xảy ra lỗi!");
+    return res.redirect("/employees");
   }
 };
 
-//Tìm kiếm
+//Tìm kiếm nhân viên
 const search = async (req, res) => {
   try {
     const { searchData } = req.query;

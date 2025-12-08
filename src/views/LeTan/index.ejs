@@ -277,208 +277,214 @@
       <%- include('../partials/notification.ejs') %>
     </div>
 
+    <!-- sidebar -->
+    <%- include('../partials/sidebar.ejs') %>
+
     <!-- Header -->
-    <div class="header">
+    <div class="col-md-9 col-lg-10 ms-auto p-0">
+      <div class="header">
+        <div class="container-fluid">
+          
+          <div class="d-flex  justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 mb-0">Lễ tân</h1>
+            </div>
+            <div class="d-flex gap-3">
+              <a href="/receptions/payment" class="btn btn-outline-primary">
+                <i class="fas fa-bed me-2"></i>
+                Thanh toán phòng
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+  
       <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h1 class="h3 mb-0">Lễ tân</h1>
-          </div>
-          <div class="d-flex gap-3">
-            <a href="/receptions/payment" class="btn btn-outline-primary">
-              <i class="fas fa-bed me-2"></i>
-              Thanh toán phòng
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="container-fluid">
-      <!-- Thống kê -->
-      <div class="row mb-4 g-3">
-        <div class="col">
-          <div class="stats-card">
-            <div class="stats-number text-primary"><%= stats.total %></div>
-            <div class="stats-label">Tổng số phòng</div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="stats-card">
-            <div class="stats-number text-success"><%= stats.empty %></div>
-            <div class="stats-label">Phòng trống</div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="stats-card">
-            <div class="stats-number text-danger"><%= stats.occupied %></div>
-            <div class="stats-label">Đang sử dụng</div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="stats-card">
-            <div class="stats-number text-warning"><%= stats.cleaning %></div>
-            <div class="stats-label">Đang dọn</div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="stats-card">
-            <div class="stats-number" style="color: #8b5cf6"><%= stats.booked || 0 %></div>
-            <div class="stats-label">Đã đặt</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tìm kiếm -->
-      <div class="filter-section">
-        <div class="row align-items-end">
-          <div class="col-md-5">
-            <label class="form-label">Tìm kiếm</label>
-            <input
-              type="text"
-              class="form-control"
-              id="searchInput"
-              placeholder="Tìm theo mã phòng, tên phòng hoặc mã đơn..."
-            />
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Lọc theo trạng thái</label>
-            <select class="form-select" id="statusFilter">
-              <option value="">Tất cả</option>
-              <option value="Empty">Trống</option>
-              <option value="Occupied">Đang sử dụng</option>
-              <option value="Cleaning">Đang dọn</option>
-              <option value="Booked">Đã đặt</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Lọc theo loại phòng</label>
-            <select class="form-select" id="typeFilter">
-              <option value="">Tất cả</option>
-              <% const types = [...new Set(rooms.map(r =>
-              r.LoaiPhong.TenLoaiPhong))]; %> <% types.forEach(type => { %>
-              <option value="<%= type %>"><%= type %></option>
-              <% }) %>
-            </select>
-          </div>
-          <div class="col-md-1">
-            <button class="btn btn-secondary w-100" onclick="resetFilters()">
-              <i class="fas fa-redo"></i> Đặt lại
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Danh sách phòng -->
-      <div class="room-grid" id="roomGrid">
-        <% rooms.forEach(room => { 
-          const status = room.getCurrentTrangThai();
-          const statusClass = status.toLowerCase(); 
-          const statusText = status === 'Empty' ? 'Trống' : 
-                   status === 'Occupied' ? 'Đang sử dụng' : 
-                   status === 'Cleaning' ? 'Đang dọn' : 
-                   status === 'Booked' ? 'Đã đặt' : status;
-          const firstImage = room.HinhAnh && room.HinhAnh.length > 0 ? room.HinhAnh[0].ImgURL : null;
-        %>
-        <div
-          class="room-card <%= statusClass %>"
-          data-room="<%= room.MaPhong %>"
-          data-status="<%= status %>"
-          data-type="<%= room.LoaiPhong.TenLoaiPhong %>"
-          data-name="<%= room.TenPhong %>"
-          data-booking="<%= room.MaDonDatPhong || '' %>"
-        >
-          <!-- Hình ảnh phòng -->
-          <% if (firstImage) { %>
-            <img src="<%= firstImage %>" alt="<%= room.TenPhong %>" class="room-image" />
-          <% } else { %>
-            <div class="no-image">
-              <i class="fas fa-door-open"></i>
+        <!-- Thống kê -->
+        <div class="row mb-4 g-3">
+          <div class="col">
+            <div class="stats-card">
+              <div class="stats-number text-primary"><%= stats.total %></div>
+              <div class="stats-label">Tổng số phòng</div>
             </div>
-          <% } %>
-
-          <!-- Nội dung phòng -->
-          <div class="room-content">
-            <div class="room-header">
-              <div class="room-number">
-                <i class="fas fa-door-open me-2"></i><%= room.MaPhong %>
-              </div>
-              <div class="status-badge <%= statusClass %>"><%= statusText %></div>
+          </div>
+          <div class="col">
+            <div class="stats-card">
+              <div class="stats-number text-success"><%= stats.empty %></div>
+              <div class="stats-label">Phòng trống</div>
             </div>
-
-            <div class="room-name"><%= room.TenPhong %></div>
-            <div class="room-type"><%= room.LoaiPhong.TenLoaiPhong %></div>
-
-            <!-- Chi tiết phòng -->
-            <div class="room-details">
-              <div class="room-detail-item">
-                <i class="fas fa-bed"></i>
-                <span><%= room.SoGiuong %> giường</span>
-              </div>
-              <div class="room-detail-item">
-                <i class="fas fa-users"></i>
-                <span><%= room.SucChua %> người</span>
-              </div>
+          </div>
+          <div class="col">
+            <div class="stats-card">
+              <div class="stats-number text-danger"><%= stats.occupied %></div>
+              <div class="stats-label">Đang sử dụng</div>
             </div>
-
-            <!-- Giá phòng -->
-            <div class="room-price">
-              <div class="price-item">
-                <span class="price-label">Giá theo ngày:</span>
-                <span class="price-value"><%= room.getGiaNgayToday().toLocaleString('vi-VN') %> VNĐ</span>
+          </div>
+          <div class="col">
+            <div class="stats-card">
+              <div class="stats-number text-warning"><%= stats.cleaning %></div>
+              <div class="stats-label">Đang dọn</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="stats-card">
+              <div class="stats-number" style="color: #8b5cf6"><%= stats.booked || 0 %></div>
+              <div class="stats-label">Đã đặt</div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Tìm kiếm -->
+        <div class="filter-section">
+          <div class="row align-items-end">
+            <div class="col-md-5">
+              <label class="form-label">Tìm kiếm</label>
+              <input
+                type="text"
+                class="form-control"
+                id="searchInput"
+                placeholder="Tìm theo mã phòng, tên phòng hoặc mã đơn..."
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Lọc theo trạng thái</label>
+              <select class="form-select" id="statusFilter">
+                <option value="">Tất cả</option>
+                <option value="Empty">Trống</option>
+                <option value="Occupied">Đang sử dụng</option>
+                <option value="Cleaning">Đang dọn</option>
+                <option value="Booked">Đã đặt</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Lọc theo loại phòng</label>
+              <select class="form-select" id="typeFilter">
+                <option value="">Tất cả</option>
+                <% const types = [...new Set(rooms.map(r =>
+                r.LoaiPhong.TenLoaiPhong))]; %> <% types.forEach(type => { %>
+                <option value="<%= type %>"><%= type %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button class="btn btn-secondary w-100" onclick="resetFilters()">
+                <i class="fas fa-redo"></i> Đặt lại
+              </button>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Danh sách phòng -->
+        <div class="room-grid" id="roomGrid">
+          <% rooms.forEach(room => { 
+            const status = room.getCurrentTrangThai();
+            const statusClass = status.toLowerCase(); 
+            const statusText = status === 'Empty' ? 'Trống' : 
+                     status === 'Occupied' ? 'Đang sử dụng' : 
+                     status === 'Cleaning' ? 'Đang dọn' : 
+                     status === 'Booked' ? 'Đã đặt' : status;
+            const firstImage = room.HinhAnh && room.HinhAnh.length > 0 ? room.HinhAnh[0].ImgURL : null;
+          %>
+          <div
+            class="room-card <%= statusClass %>"
+            data-room="<%= room.MaPhong %>"
+            data-status="<%= status %>"
+            data-type="<%= room.LoaiPhong.TenLoaiPhong %>"
+            data-name="<%= room.TenPhong %>"
+            data-booking="<%= room.MaDonDatPhong || '' %>"
+          >
+            <!-- Hình ảnh phòng -->
+            <% if (firstImage) { %>
+              <img src="<%= firstImage %>" alt="<%= room.TenPhong %>" class="room-image" />
+            <% } else { %>
+              <div class="no-image">
+                <i class="fas fa-door-open"></i>
               </div>
-              <div class="price-item">
-                <span class="price-label">Giá theo giờ:</span>
-                <span class="price-value"><%= room.getGiaGioToday().toLocaleString('vi-VN') %> VNĐ</span>
+            <% } %>
+  
+            <!-- Nội dung phòng -->
+            <div class="room-content">
+              <div class="room-header">
+                <div class="room-number">
+                  <i class="fas fa-door-open me-2"></i><%= room.MaPhong %>
+                </div>
+                <div class="status-badge <%= statusClass %>"><%= statusText %></div>
               </div>
-              
-              <!-- Hiển thị mã đơn nếu phòng đã đặt hoặc đang sử dụng -->
-              <% if ((status === 'Booked' || status === 'Occupied') && room.MaDonDatPhong) { %>
-              <div class="booking-code">
-                <div class="price-item">
-                  <span class="price-label">
-                    <i class="fas fa-file-invoice me-1"></i>Mã đơn:
-                  </span>
-                  <span class="price-value"><%= room.MaDonDatPhong %></span>
+  
+              <div class="room-name"><%= room.TenPhong %></div>
+              <div class="room-type"><%= room.LoaiPhong.TenLoaiPhong %></div>
+  
+              <!-- Chi tiết phòng -->
+              <div class="room-details">
+                <div class="room-detail-item">
+                  <i class="fas fa-bed"></i>
+                  <span><%= room.SoGiuong %> giường</span>
+                </div>
+                <div class="room-detail-item">
+                  <i class="fas fa-users"></i>
+                  <span><%= room.SucChua %> người</span>
                 </div>
               </div>
-              <% } %>
-            </div>
-
-            <!-- Cập nhật trạng thái -->
-            <div class="status-buttons">
-              <button
-                class="status-btn btn-empty"
-                onclick="updateStatus('<%= room.MaPhong %>', 'Empty')"
-                <%= status === 'Empty' ? 'disabled style="opacity: 0.5"' : '' %>
-              >
-                <i class="fas fa-check-circle me-1"></i>Trống
-              </button>
-              <button
-                class="status-btn btn-occupied"
-                onclick="updateStatus('<%= room.MaPhong %>', 'Occupied')"
-                <%= status === 'Occupied' ? 'disabled style="opacity: 0.5"' : '' %>
-              >
-                <i class="fas fa-user me-1"></i>Đang dùng
-              </button>
-              <button
-                class="status-btn btn-cleaning"
-                onclick="updateStatus('<%= room.MaPhong %>', 'Cleaning')"
-                <%= status === 'Cleaning' ? 'disabled style="opacity: 0.5"' : '' %>
-              >
-                <i class="fas fa-broom me-1"></i>Đang dọn
-              </button>
-              <button
-                class="status-btn btn-booked"
-                onclick="updateStatus('<%= room.MaPhong %>', 'Booked')"
-                <%= status === 'Booked' ? 'disabled style="opacity: 0.5"' : '' %>
-              >
-                <i class="fas fa-calendar-check me-1"></i>Đã đặt
-              </button>
+  
+              <!-- Giá phòng -->
+              <div class="room-price">
+                <div class="price-item">
+                  <span class="price-label">Giá theo ngày:</span>
+                  <span class="price-value"><%= room.getGiaNgayToday().toLocaleString('vi-VN') %> VNĐ</span>
+                </div>
+                <div class="price-item">
+                  <span class="price-label">Giá theo giờ:</span>
+                  <span class="price-value"><%= room.getGiaGioToday().toLocaleString('vi-VN') %> VNĐ</span>
+                </div>
+                
+                <!-- Hiển thị mã đơn nếu phòng đã đặt hoặc đang sử dụng -->
+                <% if ((status === 'Booked' || status === 'Occupied') && room.MaDonDatPhong) { %>
+                <div class="booking-code">
+                  <div class="price-item">
+                    <span class="price-label">
+                      <i class="fas fa-file-invoice me-1"></i>Mã đơn:
+                    </span>
+                    <span class="price-value"><%= room.MaDonDatPhong %></span>
+                  </div>
+                </div>
+                <% } %>
+              </div>
+  
+              <!-- Cập nhật trạng thái -->
+              <div class="status-buttons">
+                <button
+                  class="status-btn btn-empty"
+                  onclick="updateStatus('<%= room.MaPhong %>', 'Empty')"
+                  <%= status === 'Empty' ? 'disabled style="opacity: 0.5"' : '' %>
+                >
+                  <i class="fas fa-check-circle me-1"></i>Trống
+                </button>
+                <button
+                  class="status-btn btn-occupied"
+                  onclick="updateStatus('<%= room.MaPhong %>', 'Occupied')"
+                  <%= status === 'Occupied' ? 'disabled style="opacity: 0.5"' : '' %>
+                >
+                  <i class="fas fa-user me-1"></i>Đang dùng
+                </button>
+                <button
+                  class="status-btn btn-cleaning"
+                  onclick="updateStatus('<%= room.MaPhong %>', 'Cleaning')"
+                  <%= status === 'Cleaning' ? 'disabled style="opacity: 0.5"' : '' %>
+                >
+                  <i class="fas fa-broom me-1"></i>Đang dọn
+                </button>
+                <button
+                  class="status-btn btn-booked"
+                  onclick="updateStatus('<%= room.MaPhong %>', 'Booked')"
+                  <%= status === 'Booked' ? 'disabled style="opacity: 0.5"' : '' %>
+                >
+                  <i class="fas fa-calendar-check me-1"></i>Đã đặt
+                </button>
+              </div>
             </div>
           </div>
+          <% }) %>
         </div>
-        <% }) %>
       </div>
     </div>
 

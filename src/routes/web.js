@@ -26,159 +26,163 @@ const initWebRoutes = (app) => {
   // ======= Nhan Vien routes =========
   router.get(
     "/employees",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     NhanVienController.index
   );
   router.get(
     "/employees/search",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     NhanVienController.search
   );
   router.get(
     "/employees/create",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     NhanVienController.create
   );
   router.post(
     "/employees",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     upload.single("image"),
     NhanVienController.store
   );
   router.post(
     "/employees/update/:MaNV",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     upload.single("image"),
     NhanVienController.update
   );
   router.get(
     "/employees/:MaNV",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     NhanVienController.detail
   ); //Chi tiết nhân viên
 
   router.get(
     "/employees/delete/:MaNV",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     NhanVienController.destroy
   );
   router.get(
     "/employees/edit/:MaNV",
-    checkPermission(["NhanSu"]),
+    checkPermission(["NhanSu", "Admin"]),
     NhanVienController.edit
   );
 
   //  ===== Phong routes =====
   router.get(
     "/rooms",
-    checkPermission(["Phong", "KinhDoanh", "LeTan", "NhanSu"]),
+    checkPermission(["Phong", "KinhDoanh", "LeTan", "Admin"]),
     PhongController.index
   ); // Lấy danh sách phòng
   router.get(
     "/rooms/statistics",
-    checkPermission(["Phong"]),
+    checkPermission(["Phong", "Admin"]),
     PhongController.statistics
   ); // Thống kê phòng
   router.get(
     "/rooms/statistics/export",
-    checkPermission(["Phong"]),
+    checkPermission(["Phong", "Admin"]),
     PhongController.exportExcel
   ); // Xuất thống kê phòng ra file Excel
   router.get(
     "/rooms/search",
-    checkPermission(["Phong", "KinhDoanh", "LeTan"]),
+    checkPermission(["Phong", "KinhDoanh", "LeTan", "Admin"]),
     PhongController.search
   ); // Tìm kiếm phòng
   router.get(
     "/rooms/create",
-    checkPermission(["Phong"]),
+    checkPermission(["Phong", "Admin"]),
     PhongController.create
   ); // Trang tạo phòng
   router.post(
     "/rooms",
-    checkPermission(["Phong"]),
+    checkPermission(["Phong", "Admin"]),
     upload.array("HinhAnh", 20),
     PhongController.store
   ); // Lưu phòng mới
   router.get(
     "/rooms/:maPhong",
-    checkPermission(["Phong", "KinhDoanh", "LeTan"]),
+    checkPermission(["Phong", "KinhDoanh", "LeTan", "Admin"]),
     PhongController.detail
   ); // Chi tiết phòng
   router.delete(
     "/rooms/:maPhong",
-    checkPermission(["Phong"]),
+    checkPermission(["Phong", "Admin"]),
     PhongController.destroy
   ); // Xoá phòng
   router.get(
     "/rooms/:maPhong/edit",
-    checkPermission(["Phong"]),
+    checkPermission(["Phong", "Admin"]),
     PhongController.edit
   ); // Trang chỉnh sửa phòng
   router.put(
     "/rooms/:maPhong",
-    checkPermission(["Phong"]),
+    checkPermission(["Phong", "Admin"]),
     upload.array("HinhAnh", 20),
     PhongController.update
   ); // Cập nhật phòng
 
   // Bộ phận lễ tân
-  router.get("/receptions", checkPermission(["LeTan"]), LeTanController.index); // Trang lễ tân hiện thống kê phòng
+  router.get(
+    "/receptions",
+    checkPermission(["LeTan", "Admin"]),
+    LeTanController.index
+  ); // Trang lễ tân hiện thống kê phòng
   router.put(
     "/receptions/update-status/:maPhong",
-    checkPermission(["LeTan"]),
+    checkPermission(["LeTan", "Admin"]),
     LeTanController.updateStatus
   ); //cập nhật trạng thái phòng
   router.get(
     "/receptions/payment",
-    checkPermission(["LeTan"]),
+    checkPermission(["LeTan", "Admin"]),
     LeTanController.paymentList
   ); //lấy danh sách các phòng cần thanh toán
   router.get(
     "/receptions/payment/:maDatPhong",
-    checkPermission(["LeTan"]),
+    checkPermission(["LeTan", "Admin"]),
     LeTanController.paymentDetail
   ); //lấy chi tiết đơn thanh toán
   router.post(
     "/receptions/payment/:maDatPhong",
-    checkPermission(["LeTan"]),
+    checkPermission(["LeTan", "Admin"]),
     LeTanController.processPayment
   ); //xử lý thanh toán
 
   //Bộ Phận kinh doanh - Đặt phòng
   router.get(
     "/bookings",
-    checkPermission(["KinhDoanh"]),
+    checkPermission(["KinhDoanh", "Admin"]),
     DatPhongController.index
   );
   router.get(
     "/bookings/create",
-    checkPermission(["KinhDoanh"]),
+    checkPermission(["KinhDoanh", "Admin"]),
     DatPhongController.create
   );
   router.get(
     "/bookings/:maDatPhong",
-    checkPermission(["KinhDoanh"]),
+    checkPermission(["KinhDoanh", "Admin"]),
     DatPhongController.detail
   );
   router.post(
     "/bookings/create",
-    checkPermission(["KinhDoanh"]),
+    checkPermission(["KinhDoanh", "Admin"]),
     DatPhongController.createPost
   );
   router.get(
     "/bookings/:maDatPhong/edit",
-    checkPermission(["KinhDoanh"]),
+    checkPermission(["KinhDoanh", "Admin"]),
     DatPhongController.editForm
   ); // GET form
   router.post(
     "/bookings/:maDatPhong/edit",
-    checkPermission(["KinhDoanh"]),
+    checkPermission(["KinhDoanh", "Admin"]),
     DatPhongController.edit
   ); // POST form
   router.post(
     "/bookings/:maDatPhong/delete",
-    checkPermission(["KinhDoanh"]),
+    checkPermission(["KinhDoanh", "Admin"]),
     DatPhongController.destroy
   );
 

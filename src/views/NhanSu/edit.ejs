@@ -69,6 +69,14 @@
     </style>
   </head>
   <body>
+    <!-- Thông báo -->
+    <div
+      class="d-flex justify-content-end pt-1 pe-1"
+      style="position: fixed; right: 0; top: 0; z-index: 1000"
+    >
+      <%- include('../partials/notification.ejs') %>
+    </div>
+
     <div class="container my-5">
       <div class="card shadow-lg">
         <div class="card-header bg-dark text-white text-center py-3">
@@ -82,13 +90,13 @@
                 <label for="MaNV" class="form-label"
                   >Mã nhân viên <span class="text-danger">*</span></label
                 >
+                <input type="hidden" name="MaNV" value="<%= employee.MaNV %>" />
                 <input
-                disabled
+                  disabled
                   value=" <%= employee.MaNV %>"
                   type="text"
                   class="form-control"
                   id="MaNV"
-                  name="MaNV"
                   required
                   maxlength="8"
                   placeholder="VD: NV001"
@@ -184,7 +192,6 @@
                   >Password <span class="text-danger">*</span></label
                 >
                 <input
-                  disabled
                   value="<%= employee.Password %>"
                   type="text"
                   class="form-control"

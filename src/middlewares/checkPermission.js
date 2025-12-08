@@ -11,7 +11,7 @@ module.exports = function checkPermission(requiredPermission) {
     const rolePermissions = requiredPermission || [];
 
     // Admin có full quyền
-    if (rolePermissions.includes("*")) {
+    if (rolePermissions.includes("Admin")) {
       return next();
     }
 
