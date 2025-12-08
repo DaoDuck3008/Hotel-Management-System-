@@ -1,6 +1,7 @@
 import DatPhongDAO from "../DAO/DatPhongDAO.js";
 import PhongDAO from "../DAO/PhongDAO.js";
 import BookingDetailDTO from "../DTO/DatPhong/BookingDetailDTO.js";
+import { bookingSchema } from "../validators/DatPhongValidator.js";
 
 // Hiển thị danh sách đặt phòng
 const index = async (req, res) => {
@@ -50,6 +51,20 @@ const newCustomer = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
+    // Validate dữ liệu đầu vào
+    const { error } = bookingSchema.validate(req.body, {
+      abortEarly: false,
+      convert: true,
+    });
+    // Nếu dữ liệu không hợp lệ, thì trả về lỗi
+    if (error) {
+      req.flash(
+        "error",
+        error.details.map((err) => err.message)
+      );
+      return res.redirect("/bookings/create");
+    }
+
     const { rooms } = req.body;
     const _rooms = JSON.parse(rooms);
 
@@ -85,7 +100,6 @@ const editForm = async (req, res) => {
       return res.redirect("/bookings");
     }
 
-    req.flash("success", "Tải form chỉnh sửa thành công");
     res.render("DatPhong/edit.ejs", { booking, allRooms });
   } catch (error) {
     console.error(error);
@@ -96,6 +110,20 @@ const editForm = async (req, res) => {
 
 export const edit = async (req, res) => {
   try {
+    // Validate dữ liệu đầu vào
+    const { error } = bookingSchema.validate(req.body, {
+      abortEarly: false,
+      convert: true,
+    });
+    // Nếu dữ liệu không hợp lệ, thì trả về lỗi
+    if (error) {
+      req.flash(
+        "error",
+        error.details.map((err) => err.message)
+      );
+      return res.redirect("/bookings/" + req.params.maDatPhong + "/edit");
+    }
+
     const { maDatPhong } = req.params;
 
     const { rooms } = req.body;
