@@ -77,13 +77,45 @@
               >
             </h2>
             <div class="d-flex align-items-center">
-              <form action="/employees/search" method="GET">
+              <form
+                action="/employees/search"
+                method="GET"
+                class="d-flex gap-2 align-items-center"
+              >
+                <!-- Ô tìm kiếm chung -->
                 <input
-                  name="searchData"
+                  name="keyword"
                   type="text"
-                  class="form-control me-2"
+                  class="form-control"
                   placeholder="Tìm kiếm nhân viên..."
+                  style="max-width: 250px"
                 />
+
+                <!-- Chọn phòng ban -->
+                <select
+                  name="phongBan"
+                  class="form-select"
+                  style="max-width: 180px"
+                >
+                  <option value="">-- Phòng ban --</option>
+                  <option value="Phong">Bộ phận Phòng</option>
+                  <option value="NhanSu">Nhân sự</option>
+                  <option value="KinhDoanh">Kinh doanh</option>
+                  <option value="LeTan">Lễ tân</option>
+                  <option value="Admin">Admin</option>
+                </select>
+
+                <!-- Trạng thái làm việc -->
+                <select
+                  name="trangThai"
+                  class="form-select"
+                  style="max-width: 180px"
+                >
+                  <option value="">-- Trạng thái --</option>
+                  <option value="Đang làm việc">Đang làm việc</option>
+                  <option value="Đang tạm nghỉ">Đang tạm nghỉ</option>
+                </select>
+
                 <button class="btn btn-primary" type="submit">Tìm kiếm</button>
               </form>
             </div>

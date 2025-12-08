@@ -148,15 +148,43 @@ class NhanVienDAO {
 
   static async search(searchData) {
     try {
-      const whereNhanVien = await db.NhanVien.findAll({
-        where: {
+      const { keyword, phongBan, trangThai } = searchData;
+
+      const whereClause = {
+        [Op.and]: [],
+      };
+
+      // 1. Tìm theo tên hoặc mã NV
+      if (keyword && keyword.trim() !== "") {
+        whereClause[Op.and].push({
           [Op.or]: [
-            { MaNV: { [Op.like]: `%${searchData}%` } },
-            { HoTen: { [Op.like]: `%${searchData}%` } },
+            { MaNV: { [Op.like]: `%${keyword}%` } },
+            { HoTen: { [Op.like]: `%${keyword}%` } },
           ],
-        },
+        });
+      }
+
+      // 2. Lọc theo phòng ban
+      if (phongBan && phongBan !== "") {
+        whereClause[Op.and].push({ PhongBan: phongBan });
+      }
+
+      // 3. Lọc theo trạng thái làm việc
+      if (trangThai && trangThai !== "") {
+        whereClause[Op.and].push({ TrangThai: trangThai });
+      }
+
+      // Nếu không có điều kiện gì → bỏ Op.and để tránh mảng rỗng
+      if (whereClause[Op.and].length === 0) {
+        delete whereClause[Op.and];
+      }
+
+      // Query
+      const employees = await db.NhanVien.findAll({
+        where: whereClause,
       });
-      return whereNhanVien.map((employee) => new NhanVienDTO(employee));
+
+      return employees.map((employee) => new NhanVienDTO(employee));
     } catch (error) {
       console.log("Error in NhanVienDAO:", error);
       throw error;

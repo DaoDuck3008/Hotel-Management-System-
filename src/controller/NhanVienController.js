@@ -161,9 +161,7 @@ const destroy = async (req, res) => {
 //Tìm kiếm nhân viên
 const search = async (req, res) => {
   try {
-    const { searchData } = req.query;
-    console.log("SearchData: ", searchData);
-    const employees = await NhanVienDAO.search(searchData);
+    const employees = await NhanVienDAO.search(req.query);
     return res.render("NhanSu/index.ejs", { employees });
   } catch (error) {
     console.error("Error in NhanVienController: ", error);
