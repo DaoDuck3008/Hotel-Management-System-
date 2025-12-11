@@ -383,7 +383,7 @@
                         <%= gia.ThuApDung === 8 ? 'Chủ nhật' : `Thứ
                         ${gia.ThuApDung}` %>
                       </td>
-                      <td><%= gia.GiaNgay.toLocaleString() %> VNĐ</td>
+                      <td><%= gia.GiaNgay?.toLocaleString() %> VNĐ</td>
                       <td>
                         <%= gia.GiaGio ? gia.GiaGio.toLocaleString() : "-" %>
                         VNĐ
