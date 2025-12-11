@@ -158,6 +158,9 @@ class DatPhongDAO {
   static async getAllBookings() {
     try {
       const bookings = await db.DatPhong.findAll({
+        where: {
+          TrangThaiThanhToan: "ChuaThanhToan",
+        },
         include: [
           {
             model: db.KhachHang,
@@ -175,7 +178,7 @@ class DatPhongDAO {
                 as: "ChiTietGiaDatPhong",
               },
             ],
-            order: [["NgayDat", "DESC"]],
+            order: [["MaDatPhong", "DESC"]],
           },
         ],
       });
@@ -260,19 +263,7 @@ class DatPhongDAO {
           );
         }
       }
-      for (const room of ChiTiet) {
-        const now = new Date();
-        const vietnamTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
-        await db.TrangThaiPhong.create(
-          {
-            MaPhong: room.MaPhong,
-            ThoiGianCapNhat: vietnamTime,
-            TrangThai: "Booked",
-          },
-          { transaction: t }
-        );
-      }
       await t.commit();
 
       return { success: true, maDatPhong: newBooking.MaDatPhong };
@@ -298,8 +289,13 @@ class DatPhongDAO {
           as: "DatPhong",
           required: true,
           where: {
-            NgayNhanPhong: { [Op.lte]: endDatetime },
-            NgayTraPhong: { [Op.gte]: startDatetime },
+            [Op.and]: [
+              {
+                NgayNhanPhong: { [Op.lte]: endDatetime },
+                NgayTraPhong: { [Op.gte]: startDatetime },
+              },
+              { TrangThaiThanhToan: "ChuaThanhToan" },
+            ],
           },
         },
       ],
@@ -353,22 +349,6 @@ class DatPhongDAO {
     } catch (error) {
       console.error("Error fetching customers:", error);
       throw error;
-    }
-  }
-
-  static async deleteBooking(maDatPhong) {
-    try {
-      const result = await db.DatPhong.destroy({
-        where: { MaDatPhong: maDatPhong },
-      });
-      if (result) {
-        return { success: true, message: "Xóa đơn thành công!" };
-      } else {
-        return { success: false, message: "Đơn không tồn tại!" };
-      }
-    } catch (error) {
-      console.error("Error deleting booking:", error);
-      return { success: false, message: "Xóa thất bại!" };
     }
   }
 

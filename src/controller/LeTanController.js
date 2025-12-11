@@ -12,7 +12,7 @@ const index = async (req, res) => {
     for (const room of rooms) {
       const status = room.getCurrentTrangThai();
 
-      if (status === "Booked" || status === "Occupied") {
+      if (status === "Occupied") {
         // Tìm đơn đặt phòng gần nhất của phòng này
         const booking = await db.ChiTietDatPhong.findOne({
           where: { MaPhong: room.MaPhong },
@@ -80,10 +80,14 @@ const paymentList = async (req, res) => {
   try {
     const db = require("../models/index.js");
 
+    const now = new Date();
+    const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+
     // Lấy đơn: có phòng Occupied và chưa thanh toán
     const bookings = await db.DatPhong.findAll({
       where: {
         TrangThaiThanhToan: "ChuaThanhToan",
+        NgayNhanPhong: { [db.Sequelize.Op.lte]: today },
       },
       include: [
         {
@@ -318,7 +322,9 @@ const processPayment = async (req, res) => {
 
     // Lấy tất cả phòng trong đơn
     const booking = await db.DatPhong.findOne({
-      where: { MaDatPhong: maDatPhong },
+      where: {
+        MaDatPhong: maDatPhong,
+      },
       include: [
         {
           model: db.ChiTietDatPhong,

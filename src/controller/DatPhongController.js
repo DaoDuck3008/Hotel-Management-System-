@@ -109,6 +109,7 @@ const editForm = async (req, res) => {
 };
 
 export const edit = async (req, res) => {
+  console.log("Edit booking data:", req.body);
   try {
     // Validate dữ liệu đầu vào
     const { error } = bookingSchema.validate(req.body, {

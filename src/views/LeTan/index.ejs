@@ -326,12 +326,6 @@
               <div class="stats-label">Đang dọn</div>
             </div>
           </div>
-          <div class="col">
-            <div class="stats-card">
-              <div class="stats-number" style="color: #8b5cf6"><%= stats.booked || 0 %></div>
-              <div class="stats-label">Đã đặt</div>
-            </div>
-          </div>
         </div>
   
         <!-- Tìm kiếm -->
@@ -353,7 +347,6 @@
                 <option value="Empty">Trống</option>
                 <option value="Occupied">Đang sử dụng</option>
                 <option value="Cleaning">Đang dọn</option>
-                <option value="Booked">Đã đặt</option>
               </select>
             </div>
             <div class="col-md-3">
@@ -381,8 +374,7 @@
             const statusClass = status.toLowerCase(); 
             const statusText = status === 'Empty' ? 'Trống' : 
                      status === 'Occupied' ? 'Đang sử dụng' : 
-                     status === 'Cleaning' ? 'Đang dọn' : 
-                     status === 'Booked' ? 'Đã đặt' : status;
+                     status === 'Cleaning' ? 'Đang dọn' : "";
             const firstImage = room.HinhAnh && room.HinhAnh.length > 0 ? room.HinhAnh[0].ImgURL : null;
           %>
           <div
@@ -438,7 +430,7 @@
                 </div>
                 
                 <!-- Hiển thị mã đơn nếu phòng đã đặt hoặc đang sử dụng -->
-                <% if ((status === 'Booked' || status === 'Occupied') && room.MaDonDatPhong) { %>
+                <% if ((status === 'Occupied') && room.MaDonDatPhong) { %>
                 <div class="booking-code">
                   <div class="price-item">
                     <span class="price-label">

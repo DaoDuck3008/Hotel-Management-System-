@@ -51,9 +51,11 @@ const bookingSchema = Joi.object({
         LoaiGia: Joi.string().valid("Giá Ngày", "Giá Giờ").required(),
         ChiTietGiaDatPhong: Joi.array().items(
           Joi.object({
+            MaCTGiaDatPhong: Joi.number().optional(),
             Ngay: Joi.string().required(),
             GiaNgay: Joi.number().required(),
             GiaGio: Joi.number().required(),
+            LoaiGia: Joi.string().valid("Giá Ngày", "Giá Giờ").optional(),
           })
         ),
       });
