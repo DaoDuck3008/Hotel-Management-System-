@@ -519,7 +519,7 @@
             alert(data.message);
             location.replace("/rooms");
           } else {
-            alert("Xóa thất bại!");
+            alert(data.message || "Có lỗi xảy ra khi xóa phòng");
           }
         }
       }

@@ -143,9 +143,10 @@ const destroy = async (req, res) => {
 
     // Kiểm tra kết quả trả về từ DAO
     if (!result.success) {
-      return res
-        .status(500)
-        .json({ message: "Xóa phòng thất bại!", success: false });
+      return res.status(500).json({
+        message: "Phòng đang được đặt, không thể xóa!",
+        success: false,
+      });
     }
 
     return res
@@ -155,7 +156,7 @@ const destroy = async (req, res) => {
     console.error("Error in delete PhongController:", error);
     return res
       .status(500)
-      .json({ message: "Xóa phòng thất bại!", success: false });
+      .json({ message: "Phòng đang được đặt, không thể xóa!", success: false });
   }
 };
 
